@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@android:color/black"
+    android:paddingHorizontal="40dp"
+    tools:context=".MainActivity">
+
+    <FrameLayout
+        android:id="@+id/topMargin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <View
+            android:id="@+id/smallTimeMargin"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/largeTimeMargin"
+            android:layout_width="match_parent"
+            android:layout_height="50dp" />
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/smallTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="-4dp"
+        android:fontFamily="@font/productsans_thin"
+        android:gravity="center_vertical"
+        android:includeFontPadding="false"
+        android:paddingBottom="10dp"
+        android:textColor="@android:color/white"
+        android:textSize="94sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topMargin" />
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:includeFontPadding="false"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/smallTime"
+        tools:text="Fri, 12 Jul" />
+
+    <TextView
+        android:id="@+id/info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:includeFontPadding="false"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/date"
+        tools:text="Info" />
+
+    <TextView
+        android:id="@+id/weather"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:includeFontPadding="false"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/info"
+        tools:text="Weather" />
+
+    <TextView
+        android:id="@+id/alarm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="-4px"
+        android:layout_marginTop="10dp"
+        android:drawablePadding="4dp"
+        android:gravity="center_vertical"
+        android:includeFontPadding="false"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:visibility="gone"
+        app:drawableStartCompat="@drawable/ic_alarm"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/weather"
+        tools:text="Alarm"
+        tools:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/notificationSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="-4px"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingTop="10dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="10dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/alarm"
+        tools:ignore="RtlSymmetry" />
+
+    <LinearLayout
+        android:id="@+id/largeTimeHoursRoot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/notificationSmall">
+
+        <TextView
+            android:id="@+id/largeTimeHoursOne"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/productsans_thin"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:minWidth="112dp"
+            android:textColor="@android:color/white"
+            android:textSize="180sp"
+            tools:text="0" />
+
+        <TextView
+            android:id="@+id/largeTimeHoursTwo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-10dp"
+            android:fontFamily="@font/productsans_thin"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:minWidth="112dp"
+            android:textColor="@android:color/white"
+            android:textSize="180sp"
+            tools:text="1" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/largeTimeMinutesRoot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-70dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/largeTimeHoursRoot">
+
+        <TextView
+            android:id="@+id/largeTimeMinutesOne"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/productsans_thin"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:minWidth="112dp"
+            android:textColor="@android:color/white"
+            android:textSize="180sp"
+            tools:text="0" />
+
+        <TextView
+            android:id="@+id/largeTimeMinutesTwo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-10dp"
+            android:fontFamily="@font/productsans_thin"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:minWidth="112dp"
+            android:textColor="@android:color/white"
+            android:textSize="180sp"
+            tools:text="1" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/notificationBig"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="20dp"
+        android:paddingStart="25dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/largeTimeMinutesRoot"
+        tools:ignore="RtlSymmetry" />
+
+    <TextView
+        android:id="@+id/battery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="175dp"
+        android:fontFamily="@font/roboto_light"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="100" />
+
+    <View
+        android:id="@+id/fpView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_percent="0.3" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

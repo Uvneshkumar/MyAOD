@@ -1,0 +1,405 @@
+package uvnesh.myaod
+
+import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.SharedPreferences
+import android.content.res.Resources.getSystem
+import android.database.Cursor
+import android.media.AudioManager
+import android.media.MediaPlayer
+import android.net.Uri
+import android.os.BatteryManager
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.CalendarContract
+import android.service.notification.StatusBarNotification
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.forEach
+import androidx.core.view.isVisible
+import androidx.lifecycle.MutableLiveData
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+
+class MainActivity : AppCompatActivity() {
+
+    private var maxAndNeededVolume: Int = 0
+    private lateinit var lockSound: MediaPlayer
+    private lateinit var unlockSound: MediaPlayer
+
+    private lateinit var textViewDate: TextView
+    private lateinit var textViewSmallTime: TextView
+    private lateinit var textViewLargeTimeHoursOne: TextView
+    private lateinit var textViewLargeTimeHoursTwo: TextView
+    private lateinit var textViewLargeTimeMinutesOne: TextView
+    private lateinit var textViewLargeTimeMinutesTwo: TextView
+    private lateinit var textViewInfo: TextView
+    private lateinit var textViewBattery: TextView
+    private lateinit var textViewWeather: TextView
+    private lateinit var textViewAlarm: TextView
+    private lateinit var notificationSmall: LinearLayout
+    private lateinit var notificationBig: LinearLayout
+    private lateinit var smallTimeMargin: View
+    private lateinit var largeTimeMargin: View
+
+    private lateinit var handler: Handler
+    private lateinit var timeRunnable: Runnable
+
+    private val notificationPackages = mutableListOf<String>()
+
+    private var initialPaddingLeft = 0
+    private var initialPaddingTop = 0
+    private var initialPaddingRight = 0
+    private var initialPaddingBottom = 0
+
+    private var currentBrightness = 0
+    private var currentVolume = 0
+
+    private lateinit var sharedPrefs: SharedPreferences
+
+    private fun finishApp() {
+        executeCommand("su -c settings put system screen_brightness $currentBrightness")
+        setDeviceVolume(maxAndNeededVolume)
+        unlockSound.start()
+        Handler(Looper.getMainLooper()).postDelayed({
+            setDeviceVolume(currentVolume)
+            lockSound.release()
+            unlockSound.release()
+        }, 500)
+        finishAndRemoveTask()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (!isFinishing) {
+            finishApp()
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        currentBrightness = getCurrentBrightness()
+        currentVolume = getCurrentDeviceVolume()
+        maxAndNeededVolume = (maxAndNeededVolume * (70.0 / 100.0)).toInt()
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        lockSound = MediaPlayer.create(this, R.raw.lock)
+        unlockSound = MediaPlayer.create(this, R.raw.unlock)
+        setDeviceVolume(maxAndNeededVolume)
+        lockSound.start()
+        Handler(Looper.getMainLooper()).postDelayed({
+            setDeviceVolume(currentVolume)
+        }, 500)
+        super.onCreate(savedInstanceState)
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+        sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        findViewById<View>(R.id.main).apply {
+            initialPaddingLeft = paddingLeft
+            initialPaddingTop = paddingTop
+            initialPaddingRight = paddingRight
+            initialPaddingBottom = paddingBottom
+            ViewCompat.setOnApplyWindowInsetsListener(this) { v, insets ->
+                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                v.setPadding(
+                    systemBars.left + initialPaddingLeft,
+                    systemBars.top + initialPaddingTop,
+                    systemBars.right + initialPaddingRight,
+                    systemBars.bottom + initialPaddingBottom
+                )
+                insets
+            }
+        }
+        textViewDate = findViewById(R.id.date)
+        textViewSmallTime = findViewById(R.id.smallTime)
+        textViewLargeTimeHoursOne = findViewById(R.id.largeTimeHoursOne)
+        textViewLargeTimeHoursTwo = findViewById(R.id.largeTimeHoursTwo)
+        textViewLargeTimeMinutesOne = findViewById(R.id.largeTimeMinutesOne)
+        textViewLargeTimeMinutesTwo = findViewById(R.id.largeTimeMinutesTwo)
+        smallTimeMargin = findViewById(R.id.smallTimeMargin)
+        largeTimeMargin = findViewById(R.id.largeTimeMargin)
+        textViewInfo = findViewById(R.id.info)
+        textViewBattery = findViewById(R.id.battery)
+        textViewWeather = findViewById(R.id.weather)
+        textViewAlarm = findViewById(R.id.alarm)
+        notificationSmall = findViewById(R.id.notificationSmall)
+        notificationBig = findViewById(R.id.notificationBig)
+        handler = Handler(Looper.getMainLooper())
+        timeRunnable = object : Runnable {
+            override fun run() {
+                updateDateTime()
+                handler.postDelayed(this, 1000) // 1 second delay
+            }
+        }
+        findViewById<View>(R.id.fpView).setOnLongClickListener {
+            finishApp()
+            true
+        }
+        listOf(
+            findViewById<ViewGroup>(R.id.largeTimeHoursRoot),
+            findViewById<ViewGroup>(R.id.largeTimeMinutesRoot)
+        ).forEach {
+            it.forEach {
+                it.setOnLongClickListener {
+                    toggleClock(false)
+                    true
+                }
+            }
+        }
+        textViewSmallTime.setOnLongClickListener {
+            toggleClock(true)
+            true
+        }
+        handler.postDelayed(timeRunnable, 0)
+        executeCommand("su -c settings put system screen_brightness 17")
+        activeNotifications.observe(this) {
+            setNotificationInfo()
+        }
+        listOf(notificationSmall, notificationBig).forEach {
+            it.setOnClickListener {
+                executeCommand("su -c service call statusbar 1")
+            }
+        }
+        textViewBattery.post {
+            toggleClock(sharedPrefs.getBoolean("isBig", true))
+        }
+    }
+
+    @SuppressLint("Range")
+    fun getNextCalendarEvent(): String? {
+        val now = Calendar.getInstance()
+        val today = Calendar.getInstance()
+        today.set(Calendar.HOUR_OF_DAY, 0)
+        today.set(Calendar.MINUTE, 0)
+        today.set(Calendar.SECOND, 0)
+        today.set(Calendar.MILLISECOND, 0)
+        val uri: Uri = CalendarContract.Events.CONTENT_URI
+        val projection = arrayOf(
+            CalendarContract.Events._ID,
+            CalendarContract.Events.TITLE,
+            CalendarContract.Events.DTSTART,
+            CalendarContract.Events.DTEND
+        )
+        val selection: String = "${CalendarContract.Events.DTSTART} > ?"
+        val selectionArgs = arrayOf(now.timeInMillis.toString())
+        val cursor: Cursor? = contentResolver.query(
+            uri, projection, selection, selectionArgs, CalendarContract.Events.DTSTART
+        )
+        var nextEvent: String? = null
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val title = it.getString(it.getColumnIndex(CalendarContract.Events.TITLE))
+                val startMillis = it.getLong(it.getColumnIndex(CalendarContract.Events.DTSTART))
+                val endMillis = it.getLong(it.getColumnIndex(CalendarContract.Events.DTEND))
+                // Format the event date/time
+                val startDate = Calendar.getInstance()
+                startDate.timeInMillis = startMillis
+                // Check if the event starts today
+                if (startDate.get(Calendar.YEAR) == today.get(Calendar.YEAR) && startDate.get(
+                        Calendar.MONTH
+                    ) == today.get(Calendar.MONTH) && startDate.get(Calendar.DAY_OF_MONTH) == today.get(
+                        Calendar.DAY_OF_MONTH
+                    )
+                ) {
+                    // Calculate time difference in minutes
+                    val diffMillis = startMillis - now.timeInMillis
+                    val diffMinutes = diffMillis / (1000 * 60)
+                    // Format the time until event starts
+                    if (diffMinutes <= 30) {
+                        nextEvent = "$title in $diffMinutes minutes"
+                    } else {
+                        // Format the start and end times
+                        val dateFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+                        val startTime = dateFormat.format(startDate.time)
+                        nextEvent = "$title at $startTime"
+                    }
+                }
+            }
+        }
+        cursor?.close()
+        return nextEvent
+    }
+
+    private fun getCurrentBrightness(): Int {
+        val command = "su -c settings get system screen_brightness"
+        val result = executeCommand(command)
+        // Parse the result to extract the brightness value
+        return try {
+            result.toInt()
+        } catch (e: NumberFormatException) {
+            e.printStackTrace()
+            -1 // Handle parsing error
+        }
+    }
+
+    private fun executeCommand(command: String): String {
+        val process = Runtime.getRuntime().exec(command)
+        val reader = BufferedReader(InputStreamReader(process.inputStream))
+        val output = StringBuilder()
+        var line: String? = ""
+        while (line != null) {
+            line = reader.readLine()
+            if (line != null) {
+                output.append(line).append("\n")
+            }
+        }
+        // Wait for the process to finish
+        process.waitFor()
+        // Close the reader
+        reader.close()
+        // Return the output as a string
+        return output.toString().trim()
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun updateDateTime() {
+        val dateFormat = SimpleDateFormat("EEE, dd MMM", Locale.getDefault())
+        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val currentDate = dateFormat.format(Date())
+        val currentTime = timeFormat.format(Date())
+        textViewDate.text = currentDate
+        textViewSmallTime.text =
+            if (currentTime.startsWith("0")) currentTime.substringAfter("0") else currentTime
+        textViewLargeTimeHoursOne.text = currentTime.substring(0, 1)
+        textViewLargeTimeHoursTwo.text = currentTime.substring(1, 2)
+        textViewLargeTimeMinutesOne.text = currentTime.substring(3, 4)
+        textViewLargeTimeMinutesTwo.text = currentTime.substring(4, 5)
+        val bm = getSystemService(BATTERY_SERVICE) as? BatteryManager
+        val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { ifilter ->
+            applicationContext.registerReceiver(null, ifilter)
+        }
+        val status: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+        val isCharging =
+            status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+        textViewBattery.text =
+            (if (isCharging) "Charging  -  " else "") + bm?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                .toString() + "%"
+        val nextEvent = getNextCalendarEvent()
+        if (nextEvent != null) {
+            // Do something with nextEvent
+            textViewInfo.text = "Upcoming event: $nextEvent"
+            textViewInfo.isVisible = true
+        } else {
+            textViewInfo.text = ""
+            textViewInfo.isVisible = false
+        }
+        setAlarmInfo()
+    }
+
+    private fun setNotificationInfo() {
+        listOf(notificationSmall, notificationBig).forEach {
+            it.removeAllViews()
+            notificationPackages.clear()
+        }
+        // Loop through the notifications
+        for (notification in activeNotifications.value.orEmpty()) {
+            // Extract information from each notification
+            val packageName = notification.packageName
+            if (notificationPackages.contains(packageName)) {
+                continue
+            }
+            notificationPackages.add(packageName)
+            val id = notification.id
+            val tag = notification.tag
+            val postTime = notification.postTime
+            // Get the notification's icon
+            val iconDrawable = notification.notification.smallIcon.loadDrawable(applicationContext)
+            // Log or process the notification information as needed
+            listOf(notificationSmall, notificationBig).forEach {
+                it.addView(ImageView(this).apply {
+                    post {
+                        setPadding(0, 5.px, 5.px, 5.px)
+                        layoutParams.height = 34.px
+                        layoutParams.width = 34.px
+                        requestLayout()
+                        setImageDrawable(iconDrawable)
+                    }
+                })
+            }
+            // You can access more details depending on your needs
+            // For example, notification.notification.extras gives you the Notification extras
+            // Handle the iconBitmap as needed
+            // Example: Display the icon in an ImageView
+            // imageView.setImageBitmap(iconBitmap)
+        }
+    }
+
+    private fun setAlarmInfo() {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val nextAlarm = alarmManager.nextAlarmClock
+        if (nextAlarm != null) {
+            // There is an upcoming alarm
+            val alarmTimeMillis = nextAlarm.triggerTime
+            // Convert millis to your preferred format (e.g., Date, Calendar)
+            val calendar = Calendar.getInstance()
+            calendar.timeInMillis = alarmTimeMillis
+            // Example of formatting the alarm time
+            val sdf = SimpleDateFormat("h:mm", Locale.getDefault())
+            val alarmTimeString = sdf.format(calendar.time)
+            // Display or use the alarm time
+            textViewAlarm.text = alarmTimeString
+            textViewAlarm.isVisible = true
+        } else {
+            // There are no alarms scheduled
+            textViewAlarm.text = ""
+            textViewAlarm.isVisible = false
+        }
+    }
+
+    private fun toggleClock(showBigClock: Boolean) {
+        sharedPrefs.edit {
+            putBoolean("isBig", showBigClock)
+        }
+        textViewSmallTime.isVisible = !showBigClock
+        textViewLargeTimeHoursOne.isVisible = showBigClock
+        textViewLargeTimeHoursTwo.isVisible = showBigClock
+        textViewLargeTimeMinutesOne.isVisible = showBigClock
+        textViewLargeTimeMinutesTwo.isVisible = showBigClock
+        smallTimeMargin.isVisible = !showBigClock
+        largeTimeMargin.isVisible = showBigClock
+        notificationSmall.isVisible = !showBigClock
+        notificationBig.isVisible = showBigClock
+    }
+
+    private fun getCurrentDeviceVolume(): Int {
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+        maxAndNeededVolume = audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC) ?: 0
+        return audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC) ?: -1
+    }
+
+    private fun setDeviceVolume(volumeLevel: Int) {
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+        audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, volumeLevel, 0)
+    }
+
+    companion object {
+        var activeNotifications: MutableLiveData<Array<StatusBarNotification>> =
+            MutableLiveData(arrayOf())
+    }
+
+}
+
+val Int.dp: Int get() = (this / getSystem().displayMetrics.density).toInt()
+val Int.px: Int get() = (this * getSystem().displayMetrics.density).toInt()
