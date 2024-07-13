@@ -75,14 +75,18 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var proximitySensor: Sensor? = null
 
     private fun finishApp() {
-        executeCommand("su -c settings put system screen_brightness $currentBrightness")
+        textViewTouchBlock.text = ""
+        textViewTouchBlock.isVisible = true
         setDeviceVolume(maxAndNeededVolume, this)
         unlockSound.start()
         Handler(Looper.getMainLooper()).postDelayed({
             setDeviceVolume(currentVolume, this)
             unlockSound.release()
         }, 500)
-        finishAndRemoveTask()
+        Handler(Looper.getMainLooper()).postDelayed({
+            executeCommand("su -c settings put system screen_brightness $currentBrightness")
+            finishAndRemoveTask()
+        }, 120)
     }
 
     override fun onPause() {
