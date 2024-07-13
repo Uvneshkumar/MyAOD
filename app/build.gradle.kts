@@ -33,6 +33,15 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    applicationVariants.all {
+        val variant = this
+        variant.outputs.map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach { output ->
+                val outputFileName = "MyAOD.apk"
+                output.outputFileName = outputFileName
+            }
+    }
 }
 
 dependencies {
