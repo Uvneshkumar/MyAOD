@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
