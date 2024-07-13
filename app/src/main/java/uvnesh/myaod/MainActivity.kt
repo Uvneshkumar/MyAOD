@@ -250,25 +250,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private fun executeCommand(command: String): String {
-        val process = Runtime.getRuntime().exec(command)
-        val reader = BufferedReader(InputStreamReader(process.inputStream))
-        val output = StringBuilder()
-        var line: String? = ""
-        while (line != null) {
-            line = reader.readLine()
-            if (line != null) {
-                output.append(line).append("\n")
-            }
-        }
-        // Wait for the process to finish
-        process.waitFor()
-        // Close the reader
-        reader.close()
-        // Return the output as a string
-        return output.toString().trim()
-    }
-
     @SuppressLint("SetTextI18n")
     private fun updateDateTime() {
         val dateFormat = SimpleDateFormat("EEE, dd MMM", Locale.getDefault())
@@ -413,6 +394,25 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     companion object {
         var activeNotifications: MutableLiveData<Array<StatusBarNotification>> =
             MutableLiveData(arrayOf())
+
+        fun executeCommand(command: String): String {
+            val process = Runtime.getRuntime().exec(command)
+            val reader = BufferedReader(InputStreamReader(process.inputStream))
+            val output = StringBuilder()
+            var line: String? = ""
+            while (line != null) {
+                line = reader.readLine()
+                if (line != null) {
+                    output.append(line).append("\n")
+                }
+            }
+            // Wait for the process to finish
+            process.waitFor()
+            // Close the reader
+            reader.close()
+            // Return the output as a string
+            return output.toString().trim()
+        }
     }
 
 }
