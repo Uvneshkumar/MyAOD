@@ -276,9 +276,12 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun updateDateTime() {
         val dateFormat = SimpleDateFormat("EEE, dd MMM", Locale.getDefault())
-        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val timeFormat = SimpleDateFormat("h:mm", Locale.getDefault())
         val currentDate = dateFormat.format(Date())
-        val currentTime = timeFormat.format(Date())
+        var currentTime = timeFormat.format(Date())
+        if (currentTime.length == 4) {
+            currentTime = "0$currentTime"
+        }
         textViewDate.text = currentDate
         textViewSmallTime.text =
             if (currentTime.startsWith("0")) currentTime.substringAfter("0") else currentTime
