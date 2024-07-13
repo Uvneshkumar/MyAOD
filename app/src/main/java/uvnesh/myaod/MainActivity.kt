@@ -58,18 +58,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var textViewAlarm: TextView
     private lateinit var notificationSmall: LinearLayout
     private lateinit var notificationBig: LinearLayout
-    private lateinit var smallTimeMargin: View
-    private lateinit var largeTimeMargin: View
 
     private lateinit var handler: Handler
     private lateinit var timeRunnable: Runnable
 
     private val notificationPackages = mutableListOf<String>()
-
-    private var initialPaddingLeft = 0
-    private var initialPaddingTop = 0
-    private var initialPaddingRight = 0
-    private var initialPaddingBottom = 0
 
     private var currentBrightness = 0
     private var currentVolume = 0
@@ -116,30 +109,12 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-        findViewById<View>(R.id.main).apply {
-            initialPaddingLeft = paddingLeft
-            initialPaddingTop = paddingTop
-            initialPaddingRight = paddingRight
-            initialPaddingBottom = paddingBottom
-            ViewCompat.setOnApplyWindowInsetsListener(this) { v, insets ->
-                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-                v.setPadding(
-                    systemBars.left + initialPaddingLeft,
-                    systemBars.top + initialPaddingTop,
-                    systemBars.right + initialPaddingRight,
-                    systemBars.bottom + initialPaddingBottom
-                )
-                insets
-            }
-        }
         textViewDate = findViewById(R.id.date)
         textViewSmallTime = findViewById(R.id.smallTime)
         textViewLargeTimeHoursOne = findViewById(R.id.largeTimeHoursOne)
         textViewLargeTimeHoursTwo = findViewById(R.id.largeTimeHoursTwo)
         textViewLargeTimeMinutesOne = findViewById(R.id.largeTimeMinutesOne)
         textViewLargeTimeMinutesTwo = findViewById(R.id.largeTimeMinutesTwo)
-        smallTimeMargin = findViewById(R.id.smallTimeMargin)
-        largeTimeMargin = findViewById(R.id.largeTimeMargin)
         textViewInfo = findViewById(R.id.info)
         textViewBattery = findViewById(R.id.battery)
         textViewWeather = findViewById(R.id.weather)
@@ -380,8 +355,6 @@ class MainActivity : AppCompatActivity() {
         textViewLargeTimeHoursTwo.isVisible = showBigClock
         textViewLargeTimeMinutesOne.isVisible = showBigClock
         textViewLargeTimeMinutesTwo.isVisible = showBigClock
-        smallTimeMargin.isVisible = !showBigClock
-        largeTimeMargin.isVisible = showBigClock
         notificationSmall.isVisible = !showBigClock
         notificationBig.isVisible = showBigClock
     }
