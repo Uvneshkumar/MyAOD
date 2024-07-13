@@ -8,6 +8,10 @@ import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.res.Resources.getSystem
 import android.database.Cursor
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -26,7 +30,6 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -40,7 +43,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private var maxAndNeededVolume: Int = 0
     private lateinit var lockSound: MediaPlayer
@@ -56,6 +59,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var textViewBattery: TextView
     private lateinit var textViewWeather: TextView
     private lateinit var textViewAlarm: TextView
+    private lateinit var textViewTouchBlock: TextView
     private lateinit var notificationSmall: LinearLayout
     private lateinit var notificationBig: LinearLayout
 
@@ -68,6 +72,9 @@ class MainActivity : AppCompatActivity() {
     private var currentVolume = 0
 
     private lateinit var sharedPrefs: SharedPreferences
+
+    private lateinit var sensorManager: SensorManager
+    private var proximitySensor: Sensor? = null
 
     private fun finishApp() {
         executeCommand("su -c settings put system screen_brightness $currentBrightness")
@@ -83,6 +90,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        sensorManager.unregisterListener(this)
         if (!isFinishing) {
             finishApp()
         }
@@ -119,8 +127,14 @@ class MainActivity : AppCompatActivity() {
         textViewBattery = findViewById(R.id.battery)
         textViewWeather = findViewById(R.id.weather)
         textViewAlarm = findViewById(R.id.alarm)
+        textViewTouchBlock = findViewById(R.id.touchBlock)
+        textViewTouchBlock.setOnTouchListener { v, event ->
+            true
+        }
         notificationSmall = findViewById(R.id.notificationSmall)
         notificationBig = findViewById(R.id.notificationBig)
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
         handler = Handler(Looper.getMainLooper())
         timeRunnable = object : Runnable {
             override fun run() {
@@ -159,6 +173,13 @@ class MainActivity : AppCompatActivity() {
         }
         textViewBattery.post {
             toggleClock(sharedPrefs.getBoolean("isBig", true))
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        proximitySensor?.also { sensor ->
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
         }
     }
 
@@ -369,6 +390,25 @@ class MainActivity : AppCompatActivity() {
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager?
         audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, volumeLevel, 0)
     }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        event?.let {
+            if (it.sensor.type == Sensor.TYPE_PROXIMITY) {
+                // "it.values[0]" gives you the proximity distance in centimeters
+                if (it.values[0] < (proximitySensor?.maximumRange ?: 0f)) {
+                    // Proximity sensor is covered
+                    // Add your logic here
+                    textViewTouchBlock.isVisible = true
+                } else {
+                    // Proximity sensor is not covered
+                    // Add your logic here
+                    textViewTouchBlock.isVisible = false
+                }
+            }
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
     companion object {
         var activeNotifications: MutableLiveData<Array<StatusBarNotification>> =

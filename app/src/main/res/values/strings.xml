@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">My AOD</string>
+    <string name="sensor_covered">Sensor Covered</string>
 </resources>

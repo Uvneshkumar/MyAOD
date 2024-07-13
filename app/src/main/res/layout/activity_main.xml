@@ -218,4 +218,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintWidth_percent="0.3" />
 
+    <TextView
+        android:id="@+id/touchBlock"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:gravity="center"
+        android:text="@string/sensor_covered"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:visibility="gone" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
