@@ -45,8 +45,6 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
-    private var maxAndNeededVolume: Int = 0
-    private lateinit var lockSound: MediaPlayer
     private lateinit var unlockSound: MediaPlayer
 
     private lateinit var textViewDate: TextView
@@ -69,7 +67,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private val notificationPackages = mutableListOf<String>()
 
     private var currentBrightness = 0
-    private var currentVolume = 0
 
     private lateinit var sharedPrefs: SharedPreferences
 
@@ -78,11 +75,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private fun finishApp() {
         executeCommand("su -c settings put system screen_brightness $currentBrightness")
-        setDeviceVolume(maxAndNeededVolume)
+        setDeviceVolume(maxAndNeededVolume, this)
         unlockSound.start()
         Handler(Looper.getMainLooper()).postDelayed({
-            setDeviceVolume(currentVolume)
-            lockSound.release()
+            setDeviceVolume(currentVolume, this)
             unlockSound.release()
         }, 500)
         finishAndRemoveTask()
@@ -99,15 +95,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         currentBrightness = getCurrentBrightness()
-        currentVolume = getCurrentDeviceVolume()
-        maxAndNeededVolume = (maxAndNeededVolume * (70.0 / 100.0)).toInt()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        lockSound = MediaPlayer.create(this, R.raw.lock)
         unlockSound = MediaPlayer.create(this, R.raw.unlock)
-        setDeviceVolume(maxAndNeededVolume)
-        lockSound.start()
         Handler(Looper.getMainLooper()).postDelayed({
-            setDeviceVolume(currentVolume)
+            setDeviceVolume(currentVolume, this)
         }, 500)
         super.onCreate(savedInstanceState)
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -361,17 +352,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         notificationBig.isVisible = showBigClock
     }
 
-    private fun getCurrentDeviceVolume(): Int {
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-        maxAndNeededVolume = audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC) ?: 0
-        return audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC) ?: -1
-    }
-
-    private fun setDeviceVolume(volumeLevel: Int) {
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-        audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, volumeLevel, 0)
-    }
-
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
             if (it.sensor.type == Sensor.TYPE_PROXIMITY) {
@@ -392,6 +372,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
     companion object {
+
+        var maxAndNeededVolume: Int = 0
+        var currentVolume = 0
+
         var activeNotifications: MutableLiveData<Array<StatusBarNotification>> =
             MutableLiveData(arrayOf())
 
@@ -412,6 +396,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             reader.close()
             // Return the output as a string
             return output.toString().trim()
+        }
+
+        fun setDeviceVolume(volumeLevel: Int, applicationContext: Context) {
+            val audioManager =
+                applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+            audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, volumeLevel, 0)
         }
     }
 
