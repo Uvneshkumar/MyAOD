@@ -27,6 +27,7 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
@@ -107,6 +108,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+        onBackPressedDispatcher.addCallback {}
         sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         textViewDate = findViewById(R.id.date)
         textViewSmallTime = findViewById(R.id.smallTime)
