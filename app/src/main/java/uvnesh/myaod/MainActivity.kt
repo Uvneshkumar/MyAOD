@@ -76,7 +76,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private fun finishApp() {
         enableTouch()
-        textViewTouchBlock.text = ""
         textViewTouchBlock.isVisible = true
         setDeviceVolume(maxAndNeededVolume, this)
         unlockSound.start()
