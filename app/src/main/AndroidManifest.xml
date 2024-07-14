@@ -28,6 +28,7 @@
         </activity>
         <activity
             android:name=".MainActivity"
+            android:configChanges="colorMode|density|fontScale|fontWeightAdjustment|grammaticalGender|keyboard|keyboardHidden|layoutDirection|locale|mcc|mnc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|touchscreen|uiMode"
             android:exported="true"
             android:screenOrientation="portrait"
             tools:ignore="DiscouragedApi, LockedOrientationActivity" />
