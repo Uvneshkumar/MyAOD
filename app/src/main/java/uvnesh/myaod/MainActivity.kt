@@ -305,7 +305,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         for (notification in activeNotifications.value.orEmpty()) {
             // Extract information from each notification
             val packageName = notification.packageName
-            if (notificationPackages.contains(packageName)) {
+            if (notificationPackages.contains(packageName) || notification.notification.visibility == -1) {
+                notificationPackages.add(packageName)
                 continue
             }
             notificationPackages.add(packageName)
