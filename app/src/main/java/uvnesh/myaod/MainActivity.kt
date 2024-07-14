@@ -75,6 +75,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var proximitySensor: Sensor? = null
 
     private fun finishApp() {
+        enableTouch()
         textViewTouchBlock.text = ""
         textViewTouchBlock.isVisible = true
         setDeviceVolume(maxAndNeededVolume, this)
@@ -87,6 +88,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             executeCommand("su -c settings put system screen_brightness $currentBrightness")
             finishAndRemoveTask()
         }, 120)
+    }
+
+    private fun blockTouch() {
+        executeCommand("su -c cp -pr /dev/input /data/adb/aodbackup")
+        executeCommand("su -c rm $(getevent -pl 2>&1 | sed -n '/^add/{h}/ABS_MT_TOUCH/{x;s/[^/]*//p}')")
+    }
+
+    private fun enableTouch() {
+        executeCommand("su -c cp -pr /data/adb/aodbackup/input /dev")
     }
 
     override fun onPause() {
@@ -365,10 +375,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 if (it.values[0] < (proximitySensor?.maximumRange ?: 0f)) {
                     // Proximity sensor is covered
                     // Add your logic here
+                    blockTouch()
                     textViewTouchBlock.isVisible = true
                 } else {
                     // Proximity sensor is not covered
                     // Add your logic here
+                    enableTouch()
                     textViewTouchBlock.isVisible = false
                 }
             }
