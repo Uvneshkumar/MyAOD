@@ -75,8 +75,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var proximitySensor: Sensor? = null
 
     private fun finishApp() {
-        enableTouch()
         textViewTouchBlock.isVisible = true
+        enableTouch()
         setDeviceVolume(maxAndNeededVolume, this)
         unlockSound.start()
         Handler(Looper.getMainLooper()).postDelayed({
@@ -95,7 +95,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun enableTouch() {
-        executeCommand("su -c cp -pr /data/adb/aodbackup/input /dev")
+        Handler(Looper.getMainLooper()).postDelayed({
+            executeCommand("su -c cp -pr /data/adb/aodbackup/input /dev")
+        }, 120)
     }
 
     override fun onPause() {
@@ -379,8 +381,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 } else {
                     // Proximity sensor is not covered
                     // Add your logic here
-                    enableTouch()
                     textViewTouchBlock.isVisible = false
+                    enableTouch()
                 }
             }
         }
