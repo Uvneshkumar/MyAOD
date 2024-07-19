@@ -170,7 +170,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             true
         }
         handler.postDelayed(timeRunnable, 0)
-        executeCommand("su -c settings put system screen_brightness 17")
+        executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
         activeNotifications.observe(this) {
             setNotificationInfo()
         }
