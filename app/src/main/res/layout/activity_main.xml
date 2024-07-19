@@ -12,7 +12,7 @@
     <View
         android:id="@+id/topMargin"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="@dimen/top_margin"
         app:layout_constraintTop_toTopOf="parent" />
 
     <uvnesh.myaod.SwipeDetectableView
@@ -117,7 +117,7 @@
         android:id="@+id/largeTimeHoursRoot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="@dimen/large_clock_margin_top"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -191,7 +191,7 @@
         android:id="@+id/notificationBig"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="@dimen/notification_big_margin_top"
         android:gravity="center"
         android:orientation="horizontal"
         android:padding="20dp"
@@ -205,7 +205,7 @@
         android:id="@+id/battery"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="175dp"
+        android:layout_marginBottom="@dimen/battery_margin_bottom"
         android:fontFamily="@font/roboto_light"
         android:gravity="center"
         android:includeFontPadding="false"
@@ -220,7 +220,7 @@
         android:id="@+id/fpView"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="@dimen/fingerprint_margin_bottom"
         android:background="@drawable/circle"
         android:contentDescription="@string/unlock"
         android:padding="16dp"

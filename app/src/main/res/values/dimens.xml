@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="top_margin">100dp</dimen>
+    <dimen name="large_clock_margin_top">50dp</dimen>
+    <dimen name="notification_big_margin_top">50dp</dimen>
+    <dimen name="battery_margin_bottom">175dp</dimen>
+    <dimen name="fingerprint_margin_bottom">40dp</dimen>
+</resources>
