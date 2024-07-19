@@ -6,7 +6,6 @@ import android.content.Intent
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Bundle
-import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
 import uvnesh.myaod.MainActivity.Companion.currentVolume
 import uvnesh.myaod.MainActivity.Companion.maxAndNeededVolume
@@ -19,9 +18,8 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         currentVolume = getCurrentDeviceVolume()
-        val outVolumeValue = TypedValue()
-        resources.getValue(R.dimen.volume_percentage, outVolumeValue, true)
-        maxAndNeededVolume = (maxAndNeededVolume * outVolumeValue.float / 100.0).toInt()
+        maxAndNeededVolume =
+            (maxAndNeededVolume * resources.getInteger(R.integer.volume_percentage) / 100.0).toInt()
         lockSound = MediaPlayer.create(this, R.raw.lock)
         setDeviceVolume(maxAndNeededVolume, this)
         lockSound.start()
