@@ -347,9 +347,22 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             // Example of formatting the alarm time
             val sdf = SimpleDateFormat("h:mm", Locale.getDefault())
             val alarmTimeString = sdf.format(calendar.time)
-            // Display or use the alarm time
-            textViewAlarm.text = alarmTimeString
-            textViewAlarm.isVisible = true
+            // Get the current time
+            val currentTime = Date()
+            // Calculate the time difference in milliseconds
+            val timeDifference = calendar.time.time - currentTime.time
+            // Convert milliseconds to hours
+            val hoursDifference = timeDifference / (1000 * 60 * 60)
+            // Check if the time to be checked is within the next 12 hours
+            val isWithin12Hours = hoursDifference < 12
+            if (isWithin12Hours) {
+                // Display or use the alarm time
+                textViewAlarm.text = alarmTimeString
+                textViewAlarm.isVisible = true
+            } else {
+                textViewAlarm.text = ""
+                textViewAlarm.isVisible = false
+            }
         } else {
             // There are no alarms scheduled
             textViewAlarm.text = ""
