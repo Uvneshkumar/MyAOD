@@ -216,16 +216,15 @@
         app:layout_constraintStart_toStartOf="parent"
         tools:text="100" />
 
-    <ImageView
+    <View
         android:id="@+id/fpView"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="84dp"
+        android:layout_height="0dp"
         android:layout_marginBottom="@dimen/fingerprint_margin_bottom"
         android:background="@drawable/circle"
-        android:contentDescription="@string/unlock"
         android:padding="16dp"
-        android:src="@drawable/ic_lock_open"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
