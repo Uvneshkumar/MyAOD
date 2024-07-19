@@ -203,10 +203,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val projection = arrayOf(
             CalendarContract.Events._ID,
             CalendarContract.Events.TITLE,
-            CalendarContract.Events.DTSTART,
-            CalendarContract.Events.DTEND
+            CalendarContract.Events.DTSTART
         )
-        val selection: String = "${CalendarContract.Events.DTSTART} > ?"
+        val selection = "${CalendarContract.Events.DTSTART} >= ?"
         val selectionArgs = arrayOf(now.timeInMillis.toString())
         val cursor: Cursor? = contentResolver.query(
             uri, projection, selection, selectionArgs, CalendarContract.Events.DTSTART
@@ -216,7 +215,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             if (it.moveToFirst()) {
                 val title = it.getString(it.getColumnIndex(CalendarContract.Events.TITLE))
                 val startMillis = it.getLong(it.getColumnIndex(CalendarContract.Events.DTSTART))
-                val endMillis = it.getLong(it.getColumnIndex(CalendarContract.Events.DTEND))
                 // Format the event date/time
                 val startDate = Calendar.getInstance()
                 startDate.timeInMillis = startMillis
