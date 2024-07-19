@@ -5,4 +5,5 @@
     <dimen name="notification_big_margin_top">50dp</dimen>
     <dimen name="battery_margin_bottom">170dp</dimen>
     <dimen name="fingerprint_margin_bottom">50dp</dimen>
+    <item name="volume_percentage" format="float" type="dimen">70.0</item>
 </resources>
