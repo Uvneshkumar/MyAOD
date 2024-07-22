@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <bool name="should_lock_screen">false</bool>
-    <bool name="should_unlock_on_tap">false</bool>
+    <bool name="should_unlock_on_tap">true</bool>
 </resources>
