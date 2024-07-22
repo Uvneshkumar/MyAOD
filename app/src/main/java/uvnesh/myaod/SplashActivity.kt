@@ -17,15 +17,20 @@ class SplashActivity : AppCompatActivity() {
     private lateinit var lockSound: MediaPlayer
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        currentVolume = getCurrentDeviceVolume()
-        maxAndNeededVolume =
-            (maxAndNeededVolume * resources.getInteger(R.integer.volume_percentage) / 100.0).toInt()
-        lockSound = MediaPlayer.create(this, R.raw.lock)
-        setDeviceVolume(maxAndNeededVolume, this)
-        lockSound.start()
         super.onCreate(savedInstanceState)
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
+        lockSound = MediaPlayer.create(this, R.raw.lock)
+        if (resources.getBoolean(R.bool.should_lock_screen)) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        } else {
+            currentVolume = getCurrentDeviceVolume()
+            maxAndNeededVolume =
+                (maxAndNeededVolume * resources.getInteger(R.integer.volume_percentage) / 100.0).toInt()
+            setDeviceVolume(maxAndNeededVolume, this)
+            lockSound.start()
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
     }
 
     override fun onDestroy() {

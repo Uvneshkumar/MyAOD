@@ -102,6 +102,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onPause() {
         super.onPause()
+        if (resources.getBoolean(R.bool.should_lock_screen)) {
+            if (!isFinishing) {
+                finishAndRemoveTask()
+                return
+            }
+        }
         sensorManager.unregisterListener(this)
         if (!isFinishing) {
             finishApp()
@@ -110,19 +116,29 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
-        currentBrightness = getCurrentBrightness()
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        unlockSound = MediaPlayer.create(this, R.raw.unlock)
-        Handler(Looper.getMainLooper()).postDelayed({
-            setDeviceVolume(currentVolume, this)
-        }, 500)
-        super.onCreate(savedInstanceState)
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-        enableEdgeToEdge()
+        if (!resources.getBoolean(R.bool.should_lock_screen)) {
+            enableEdgeToEdge()
+        }
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        textViewTouchBlock = findViewById(R.id.touchBlock)
+        if (resources.getBoolean(R.bool.should_lock_screen)) {
+            textViewTouchBlock.isVisible = true
+            Handler(Looper.getMainLooper()).postDelayed({
+                executeCommand("su -c input keyevent 223")
+            }, 100)
+            return
+        }
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        currentBrightness = getCurrentBrightness()
+        unlockSound = MediaPlayer.create(this, R.raw.unlock)
+        Handler(Looper.getMainLooper()).postDelayed({
+            setDeviceVolume(currentVolume, this)
+        }, 500)
         onBackPressedDispatcher.addCallback {}
         sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         textViewDate = findViewById(R.id.date)
@@ -135,7 +151,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewBattery = findViewById(R.id.battery)
         textViewWeather = findViewById(R.id.weather)
         textViewAlarm = findViewById(R.id.alarm)
-        textViewTouchBlock = findViewById(R.id.touchBlock)
         textViewTouchBlock.setOnTouchListener { v, event ->
             true
         }
@@ -150,9 +165,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 handler.postDelayed(this, 1000) // 1 second delay
             }
         }
-        findViewById<View>(R.id.fpView).setOnLongClickListener {
-            finishApp()
-            true
+        if (resources.getBoolean(R.bool.should_unlock_on_tap)) {
+            findViewById<View>(R.id.fpView).setOnClickListener {
+                finishApp()
+            }
+        } else {
+            findViewById<View>(R.id.fpView).setOnLongClickListener {
+                finishApp()
+                true
+            }
         }
         listOf(
             findViewById<ViewGroup>(R.id.largeTimeHoursRoot),
