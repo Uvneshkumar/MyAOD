@@ -396,7 +396,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         event?.let {
             if (it.sensor.type == Sensor.TYPE_PROXIMITY) {
                 // "it.values[0]" gives you the proximity distance in centimeters
-                if (it.values[0] < (proximitySensor?.maximumRange ?: 0f)) {
+                if (it.values[0] <= 0f) {
                     // Proximity sensor is covered
                     // Add your logic here
                     blockTouch()
