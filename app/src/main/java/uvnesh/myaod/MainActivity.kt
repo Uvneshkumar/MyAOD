@@ -60,7 +60,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var textViewAlarm: TextView
     private lateinit var textViewTouchBlock: TextView
     private lateinit var notificationSmall: LinearLayout
-    private lateinit var notificationBig: LinearLayout
 
     private lateinit var handler: Handler
     private lateinit var timeRunnable: Runnable
@@ -155,7 +154,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             true
         }
         notificationSmall = findViewById(R.id.notificationSmall)
-        notificationBig = findViewById(R.id.notificationBig)
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
         handler = Handler(Looper.getMainLooper())
@@ -195,10 +193,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         activeNotifications.observe(this) {
             setNotificationInfo()
         }
-        listOf(notificationSmall, notificationBig).forEach {
-            it.setOnClickListener {
-                executeCommand("su -c service call statusbar 1")
-            }
+        notificationSmall.setOnClickListener {
+            executeCommand("su -c service call statusbar 1")
         }
         textViewBattery.post {
             toggleClock(sharedPrefs.getBoolean("isBig", true))
@@ -316,10 +312,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun setNotificationInfo() {
-        listOf(notificationSmall, notificationBig).forEach {
-            it.removeAllViews()
-            notificationPackages.clear()
-        }
+        notificationSmall.removeAllViews()
+        notificationPackages.clear()
         // Loop through the notifications
         for (notification in activeNotifications.value.orEmpty()) {
             // Extract information from each notification
@@ -335,17 +329,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             // Get the notification's icon
             val iconDrawable = notification.notification.smallIcon.loadDrawable(applicationContext)
             // Log or process the notification information as needed
-            listOf(notificationSmall, notificationBig).forEach {
-                it.addView(ImageView(this).apply {
-                    post {
-                        setPadding(0, 5.px, 5.px, 5.px)
-                        layoutParams.height = 34.px
-                        layoutParams.width = 34.px
-                        requestLayout()
-                        setImageDrawable(iconDrawable)
-                    }
-                })
-            }
+            notificationSmall.addView(ImageView(this).apply {
+                post {
+                    setPadding(0, 5.px, 5.px, 5.px)
+                    layoutParams.height = 34.px
+                    layoutParams.width = 34.px
+                    requestLayout()
+                    setImageDrawable(iconDrawable)
+                }
+            })
             // You can access more details depending on your needs
             // For example, notification.notification.extras gives you the Notification extras
             // Handle the iconBitmap as needed
@@ -398,8 +390,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewLargeTimeHoursTwo.isVisible = showBigClock
         textViewLargeTimeMinutesOne.isVisible = showBigClock
         textViewLargeTimeMinutesTwo.isVisible = showBigClock
-        notificationSmall.isVisible = !showBigClock
-        notificationBig.isVisible = showBigClock
     }
 
     override fun onSensorChanged(event: SensorEvent?) {

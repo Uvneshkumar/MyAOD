@@ -2,7 +2,6 @@
 <resources>
     <dimen name="top_margin">100dp</dimen>
     <dimen name="large_clock_margin_top">50dp</dimen>
-    <dimen name="notification_big_margin_top">50dp</dimen>
     <dimen name="battery_margin_bottom">174dp</dimen>
     <dimen name="fingerprint_margin_bottom">50dp</dimen>
     <dimen name="notification_small_margin_bottom">15dp</dimen>
