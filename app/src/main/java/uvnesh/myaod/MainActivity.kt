@@ -327,7 +327,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         // Loop through the notifications
         for (notification in activeNotifications.value.orEmpty()) {
             if (notification.notification?.fullScreenIntent != null && notification.notification.channelId == "Firing" && notification.packageName == "com.google.android.deskclock" && notification.notification.actions?.size == 2) {
-                executeCommand("su -c settings put system screen_brightness $currentBrightness")
+                // Max Brightness to make Alarm more "disturbing"
+                executeCommand("su -c settings put system screen_brightness 255")
                 Handler(Looper.getMainLooper()).postDelayed({
                     isFullScreenNotificationTriggered = true
                     executeCommand("su -c input tap 400 200")
