@@ -73,6 +73,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private var proximitySensor: Sensor? = null
 
+    private var isFullScreenNotificationTriggered = false
+
     private fun finishApp() {
         textViewTouchBlock.isVisible = true
         enableTouch()
@@ -101,6 +103,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onPause() {
         super.onPause()
+        if (isFullScreenNotificationTriggered) {
+            return
+        }
         if (resources.getBoolean(R.bool.should_lock_screen)) {
             if (!isFinishing) {
                 finishAndRemoveTask()
@@ -203,9 +208,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
-        proximitySensor?.also { sensor ->
-            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        if (isFullScreenNotificationTriggered) {
+            executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
+        } else {
+            proximitySensor?.also { sensor ->
+                sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+            }
         }
+        isFullScreenNotificationTriggered = false
     }
 
     @SuppressLint("Range")
@@ -316,6 +326,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         notificationPackages.clear()
         // Loop through the notifications
         for (notification in activeNotifications.value.orEmpty()) {
+            if (notification.notification?.fullScreenIntent != null && notification.notification.channelId == "Firing" && notification.packageName == "com.google.android.deskclock" && notification.notification.actions?.size == 2) {
+                executeCommand("su -c settings put system screen_brightness $currentBrightness")
+                Handler(Looper.getMainLooper()).postDelayed({
+                    isFullScreenNotificationTriggered = true
+                    executeCommand("su -c input tap 400 200")
+                }, 1000)
+                continue
+            }
             // Extract information from each notification
             val packageName = notification.packageName
             if (notificationPackages.contains(packageName) || notification.notification.visibility == -1) {
