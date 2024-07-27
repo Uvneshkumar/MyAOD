@@ -415,7 +415,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
-            if (it.sensor.type == Sensor.TYPE_PROXIMITY) {
+            if (it.sensor.type == Sensor.TYPE_PROXIMITY && resources.getBoolean(R.bool.should_use_proximity)) {
                 // "it.values[0]" gives you the proximity distance in centimeters
                 if (it.values[0] <= 0f) {
                     // Proximity sensor is covered
