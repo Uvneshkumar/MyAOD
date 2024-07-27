@@ -1,5 +1,6 @@
 package uvnesh.myaod
 
+import android.animation.Animator
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.content.Context
@@ -76,6 +77,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var isFullScreenNotificationTriggered = false
 
     private fun finishApp() {
+        textViewTouchBlock.animateAlpha(240)
         textViewTouchBlock.isVisible = true
         enableTouch()
         setDeviceVolume(maxAndNeededVolume, this)
@@ -432,6 +434,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
+    override fun onDestroy() {
+        super.onDestroy()
+        executeCommand("su -c killall $packageName")
+    }
+
     companion object {
 
         var maxAndNeededVolume: Int = 0
@@ -470,3 +477,19 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 val Int.dp: Int get() = (this / getSystem().displayMetrics.density).toInt()
 val Int.px: Int get() = (this * getSystem().displayMetrics.density).toInt()
+
+fun View.animateAlpha(duration: Long = 100, isReverse: Boolean = false) {
+    alpha = if (isReverse) 1f else 0f
+    Handler(Looper.getMainLooper()).post {
+        animate().alpha(if (isReverse) 0f else 1f).setListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator) {}
+            override fun onAnimationCancel(animation: Animator) {}
+            override fun onAnimationRepeat(animation: Animator) {}
+            override fun onAnimationEnd(animation: Animator) {
+                if (isReverse) {
+                    this@animateAlpha.isVisible = false
+                }
+            }
+        }).duration = duration
+    }
+}
