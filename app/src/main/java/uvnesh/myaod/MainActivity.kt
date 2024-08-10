@@ -47,6 +47,7 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
+    private lateinit var lockSound: MediaPlayer
     private lateinit var unlockSound: MediaPlayer
 
     private lateinit var textViewDate: TextView
@@ -130,6 +131,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             enableEdgeToEdge()
         }
         super.onCreate(savedInstanceState)
+        lockSound = MediaPlayer.create(this, R.raw.lock)
         setContentView(R.layout.activity_main)
         textViewTouchBlock = findViewById(R.id.touchBlock)
         if (resources.getBoolean(R.bool.should_lock_screen)) {
@@ -139,6 +141,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }, 100)
             return
         }
+        lockSound.start()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         currentBrightness = getCurrentBrightness()
         unlockSound = MediaPlayer.create(this, R.raw.unlock)
@@ -435,6 +438,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
     override fun onDestroy() {
+        lockSound.release()
         super.onDestroy()
         executeCommand("su -c killall $packageName")
     }
