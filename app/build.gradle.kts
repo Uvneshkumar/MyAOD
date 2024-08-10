@@ -64,4 +64,6 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.api)
+    implementation(libs.shizuku.provider)
 }

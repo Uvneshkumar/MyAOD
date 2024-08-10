@@ -466,7 +466,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 // Return the output as a string
                 return output.toString().trim()
             } catch (ignored: Exception) {
-                return ""
+                return ShizukuShell(arrayListOf(), command.substringAfter("su -c ")).exec()
             }
         }
 
