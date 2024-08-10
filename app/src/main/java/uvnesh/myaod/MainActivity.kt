@@ -448,22 +448,26 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             MutableLiveData(arrayOf())
 
         fun executeCommand(command: String): String {
-            val process = Runtime.getRuntime().exec(command)
-            val reader = BufferedReader(InputStreamReader(process.inputStream))
-            val output = StringBuilder()
-            var line: String? = ""
-            while (line != null) {
-                line = reader.readLine()
-                if (line != null) {
-                    output.append(line).append("\n")
+            try {
+                val process = Runtime.getRuntime().exec(command)
+                val reader = BufferedReader(InputStreamReader(process.inputStream))
+                val output = StringBuilder()
+                var line: String? = ""
+                while (line != null) {
+                    line = reader.readLine()
+                    if (line != null) {
+                        output.append(line).append("\n")
+                    }
                 }
+                // Wait for the process to finish
+                process.waitFor()
+                // Close the reader
+                reader.close()
+                // Return the output as a string
+                return output.toString().trim()
+            } catch (ignored: Exception) {
+                return ""
             }
-            // Wait for the process to finish
-            process.waitFor()
-            // Close the reader
-            reader.close()
-            // Return the output as a string
-            return output.toString().trim()
         }
 
         fun setDeviceVolume(volumeLevel: Int, applicationContext: Context) {
