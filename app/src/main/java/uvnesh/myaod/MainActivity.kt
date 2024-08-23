@@ -440,7 +440,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onDestroy() {
         lockSound.release()
         super.onDestroy()
-        executeCommand("su -c killall $packageName")
+//        Don't kill as it delays Notifications when app is launched again
+//        executeCommand("su -c killall $packageName")
     }
 
     companion object {
