@@ -207,7 +207,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             executeCommand("su -c service call statusbar 1")
         }
         textViewBattery.post {
-            toggleClock(sharedPrefs.getBoolean("isBig", true))
+            toggleClock(sharedPrefs.getBoolean("isBig", false))
         }
     }
 

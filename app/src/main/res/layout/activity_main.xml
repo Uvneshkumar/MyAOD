@@ -30,7 +30,6 @@
         android:paddingBottom="10dp"
         android:textColor="@android:color/white"
         android:textSize="94sp"
-        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/topMargin" />
 
@@ -119,6 +118,7 @@
             android:minWidth="112dp"
             android:textColor="@android:color/white"
             android:textSize="180sp"
+            android:visibility="gone"
             tools:text="0" />
 
         <TextView
@@ -132,6 +132,7 @@
             android:minWidth="112dp"
             android:textColor="@android:color/white"
             android:textSize="180sp"
+            android:visibility="gone"
             tools:text="1" />
 
     </LinearLayout>
@@ -156,6 +157,7 @@
             android:minWidth="112dp"
             android:textColor="@android:color/white"
             android:textSize="180sp"
+            android:visibility="gone"
             tools:text="0" />
 
         <TextView
@@ -169,6 +171,7 @@
             android:minWidth="112dp"
             android:textColor="@android:color/white"
             android:textSize="180sp"
+            android:visibility="gone"
             tools:text="1" />
 
     </LinearLayout>
