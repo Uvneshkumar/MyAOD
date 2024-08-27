@@ -260,6 +260,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onResume() {
         super.onResume()
         if (isFullScreenNotificationTriggered) {
+            toggleTorch.postValue(false)
             executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
         } else {
             proximitySensor?.also { sensor ->
@@ -382,6 +383,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 executeCommand("su -c settings put system screen_brightness 255")
                 Handler(Looper.getMainLooper()).postDelayed({
                     isFullScreenNotificationTriggered = true
+                    toggleTorch.postValue(true)
                     executeCommand("su -c input tap 400 200")
                 }, 1000)
                 continue
