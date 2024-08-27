@@ -16,6 +16,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.hardware.camera2.CameraAccessException
+import android.hardware.camera2.CameraManager
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -238,6 +240,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 }
             }
         })
+        toggleTorch.observe(this) {
+            val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            val cameraId = cameraManager.cameraIdList.firstOrNull() ?: return@observe
+            try {
+                cameraManager.setTorchMode(cameraId, it)
+            } catch (e: CameraAccessException) {
+                e.printStackTrace()
+            }
+        }
         notificationSmall.setOnClickListener {
             executeCommand("su -c service call statusbar 1")
         }
@@ -483,6 +494,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         var maxAndNeededVolume: Int = 0
         var currentVolume = 0
+        val toggleTorch = MutableLiveData(false)
 
         var activeNotifications: MutableLiveData<Array<StatusBarNotification>> =
             MutableLiveData(arrayOf())

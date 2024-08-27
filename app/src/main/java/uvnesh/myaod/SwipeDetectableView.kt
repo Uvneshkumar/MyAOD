@@ -7,6 +7,7 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import uvnesh.myaod.MainActivity.Companion.executeCommand
+import uvnesh.myaod.MainActivity.Companion.toggleTorch
 import kotlin.math.abs
 
 class SwipeDetectableView @JvmOverloads constructor(
@@ -45,6 +46,11 @@ class SwipeDetectableView @JvmOverloads constructor(
                             onSwipeUp()
                         }
                         return true
+                    } else {
+                        if (abs(deltaX) > SWIPE_THRESHOLD_VELOCITY && abs(deltaX) > MIN_SWIPE_DISTANCE) {
+                            onTorch()
+                            return true
+                        }
                     }
                     return false
                 }
@@ -54,6 +60,10 @@ class SwipeDetectableView @JvmOverloads constructor(
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return gestureDetector.onTouchEvent(event) || super.onTouchEvent(event)
+    }
+
+    private fun onTorch() {
+        toggleTorch.postValue(toggleTorch.value?.not())
     }
 
     private fun onSwipeUp() {
