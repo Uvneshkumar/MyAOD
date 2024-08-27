@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="top_margin">100dp</dimen>
     <dimen name="large_clock_margin_top">50dp</dimen>
-    <dimen name="battery_margin_bottom">140dp</dimen>
-    <dimen name="fingerprint_margin_bottom">200dp</dimen>
     <dimen name="notification_small_margin_bottom">145dp</dimen>
-    <integer name="volume_percentage">70</integer>
     <integer name="aod_brightness">17</integer>
+
+    <!--    OnePlus 9 Pro-->
+    <integer name="volume_percentage">70</integer>
+    <dimen name="fingerprint_margin_bottom">200dp</dimen>
+    <dimen name="battery_margin_bottom">140dp</dimen>
+    <dimen name="top_margin">100dp</dimen>
+
+    <!--    Pixel 2-->
+    <integer name="volume_percentage">80</integer>
+    <dimen name="fingerprint_margin_bottom">100dp</dimen>
+    <dimen name="battery_margin_bottom">40dp</dimen>
+    <dimen name="top_margin">40dp</dimen>
 </resources>
