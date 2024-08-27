@@ -7,8 +7,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.content.res.Resources.getSystem
 import android.database.Cursor
+import android.graphics.drawable.Drawable
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -38,6 +41,11 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
@@ -121,6 +129,22 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    private val appListItems: MutableSet<Pair<String, Drawable>> = mutableSetOf()
+    private val isAppsLoaded = MutableLiveData(false)
+
+    private suspend fun loadAppIcons() {
+        withContext(Dispatchers.IO) {
+            val appList: List<ApplicationInfo> =
+                packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+            for (appInfo in appList) {
+                val appName: String = appInfo.packageName
+                val appIcon: Drawable = packageManager.getApplicationIcon(appInfo)
+                appListItems.add(Pair(appName, appIcon))
+            }
+            isAppsLoaded.postValue(true)
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -133,6 +157,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
         lockSound = MediaPlayer.create(this, R.raw.lock)
         setContentView(R.layout.activity_main)
+        lifecycleScope.launch {
+            loadAppIcons()
+        }
         textViewTouchBlock = findViewById(R.id.touchBlock)
         if (resources.getBoolean(R.bool.should_lock_screen)) {
             textViewTouchBlock.isVisible = true
@@ -200,9 +227,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         handler.postDelayed(timeRunnable, 0)
         executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
-        activeNotifications.observe(this) {
-            setNotificationInfo()
-        }
+        isAppsLoaded.observe(this, object : Observer<Boolean> {
+            override fun onChanged(value: Boolean) {
+                if (value) {
+                    isAppsLoaded.removeObserver(this)
+                    activeNotifications.observe(this@MainActivity) {
+                        setNotificationInfo()
+                        notificationSmall.animateAlpha(200)
+                    }
+                }
+            }
+        })
         notificationSmall.setOnClickListener {
             executeCommand("su -c service call statusbar 1")
         }
@@ -351,13 +386,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             val tag = notification.tag
             val postTime = notification.postTime
             // Get the notification's icon
-            val iconDrawable = notification.notification.smallIcon.loadDrawable(applicationContext)
+            val iconDrawable = appListItems.find { it.first == notification.packageName }?.second
             // Log or process the notification information as needed
             notificationSmall.addView(ImageView(this).apply {
                 post {
                     setPadding(0, 5.px, 5.px, 5.px)
-                    layoutParams.height = 34.px
-                    layoutParams.width = 34.px
+                    layoutParams.height = 36.px
+                    layoutParams.width = 36.px
                     requestLayout()
                     setImageDrawable(iconDrawable)
                 }
