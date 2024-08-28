@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="large_clock_margin_top">50dp</dimen>
+    <dimen name="large_clock_margin_top">40dp</dimen>
     <dimen name="notification_small_margin_bottom">145dp</dimen>
     <integer name="aod_brightness">17</integer>
 
