@@ -10,7 +10,6 @@ import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Resources.getSystem
-import android.database.Cursor
 import android.graphics.drawable.Drawable
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -20,13 +19,12 @@ import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraManager
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.net.Uri
 import android.os.BatteryManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.CalendarContract
 import android.service.notification.StatusBarNotification
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -41,16 +39,31 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.forEach
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.Scope
+import com.google.api.client.extensions.android.http.AndroidHttp
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.util.DateTime
+import com.google.api.services.calendar.CalendarScopes
+import com.google.api.services.calendar.model.Event
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
+import java.time.LocalTime
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -86,6 +99,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var proximitySensor: Sensor? = null
 
     private var isFullScreenNotificationTriggered = false
+    private var shouldTriggerLogin = false
+    private var isLoginTriggered = false
+
+    private lateinit var googleSignInClient: GoogleSignInClient
+    private val resultCodeGoogle = 9001
+    private val scope = listOf(CalendarScopes.CALENDAR_READONLY)
 
     private fun finishApp() {
         textViewTouchBlock.animateAlpha(240)
@@ -116,7 +135,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onPause() {
         super.onPause()
-        if (isFullScreenNotificationTriggered) {
+        if (shouldTriggerLogin) {
+            isLoginTriggered = true
+        }
+        if (isFullScreenNotificationTriggered || isLoginTriggered) {
             return
         }
         if (resources.getBoolean(R.bool.should_lock_screen)) {
@@ -144,6 +166,139 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 appListItems.add(Pair(appName, appIcon))
             }
             isAppsLoaded.postValue(true)
+        }
+    }
+
+    private fun signIn() {
+        val signInIntent = googleSignInClient.signInIntent
+        shouldTriggerLogin = true
+        startActivityForResult(signInIntent, resultCodeGoogle)
+    }
+
+    @Deprecated("Deprecated")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        shouldTriggerLogin = false
+        if (requestCode == resultCodeGoogle) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                account?.let {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        getCalendarEvents(it)
+                    }
+                }
+            } catch (e: ApiException) {
+                Log.e("SignIn", "signInResult:failed code=" + e.statusCode)
+            }
+        }
+    }
+
+    private fun getEndOfDay(): DateTime {
+        val calendar = Calendar.getInstance()
+        calendar.time = Date()
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return DateTime(calendar.time)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private suspend fun getCalendarEvents(account: GoogleSignInAccount) {
+        val credential = GoogleAccountCredential.usingOAuth2(
+            this, scope
+        )
+        credential.selectedAccount = account.account
+        try {
+            val transport = AndroidHttp.newCompatibleTransport()
+            val jsonFactory = JacksonFactory.getDefaultInstance()
+            val service = com.google.api.services.calendar.Calendar.Builder(
+                transport, jsonFactory, credential
+            ).setApplicationName("MyAOD").build()
+            var now: DateTime
+            var resultsToFetch = 1
+            var shouldFetch = true
+            var event: Event? = null
+            var currentResultCount = 0
+            while (shouldFetch) {
+                now = DateTime(System.currentTimeMillis())
+                val events = service.events().list("primary").setTimeMax(getEndOfDay())
+                    .setMaxResults(resultsToFetch).setTimeMin(now).setOrderBy("startTime")
+                    .setSingleEvents(true).execute().items
+                event = events.firstOrNull {
+                    it.attendees.find { attendee -> attendee.email == account.email }?.responseStatus.orEmpty() != "declined"
+                }
+                if (event == null && currentResultCount != events.size) {
+                    currentResultCount = events.size
+                    resultsToFetch++
+                } else {
+                    shouldFetch = false
+                }
+            }
+            withContext(Dispatchers.Main) {
+                if (event == null) {
+                    Log.d("Calendar", "No upcoming events found")
+                    textViewInfo.isVisible = true
+                    textViewInfo.text = "No upcoming events today"
+                    textViewInfo.animateAlpha(400)
+                    // TODO: No Events Today. Fetch Again after next day
+                    val checkOnNextDayRunnable = object : Runnable {
+                        override fun run() {
+                            val currentTime = LocalTime.now()
+                            val midnight = LocalTime.MIDNIGHT
+                            if (currentTime == midnight) {
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    getCalendarEvents(account)
+                                }
+                            } else {
+                                // Check if midnight every second and refresh calendar
+                                Handler(Looper.getMainLooper()).postDelayed(this, 1000)
+                            }
+                        }
+                    }
+                    Handler(Looper.getMainLooper()).post(checkOnNextDayRunnable)
+                } else {
+                    val start = event.start?.dateTime?.value ?: event.start?.date?.value ?: 0
+                    val end = event.end?.dateTime?.value ?: event.end?.date?.value ?: 0
+                    val startDate = Calendar.getInstance()
+                    startDate.timeInMillis = start
+                    val updateTimeRunnable = object : Runnable {
+                        override fun run() {
+                            now = DateTime(System.currentTimeMillis())
+                            val diffMillis = start - now.value
+                            var diffMinutes: Int = (diffMillis / (1000 * 60)).toInt()
+                            diffMinutes++
+                            val nextEvent = if (diffMinutes <= 0) {
+                                "Now: ${event.summary}"
+                            } else if (diffMinutes <= 30) {
+                                "Upcoming event: ${event.summary} in $diffMinutes minute" + if (diffMinutes > 1) "s" else ""
+                            } else {
+                                val dateFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+                                val startTime = dateFormat.format(startDate.time)
+                                "Upcoming event: ${event.summary} at $startTime"
+                            }
+                            if (textViewInfo.isGone) {
+                                textViewInfo.isVisible = true
+                                textViewInfo.text = nextEvent
+                                textViewInfo.animateAlpha(400)
+                            } else if (textViewInfo.text != nextEvent) {
+                                textViewInfo.text = nextEvent
+                            }
+                            if (now.value < end) {
+                                Handler(Looper.getMainLooper()).postDelayed(this, 1000)
+                            } else {
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    getCalendarEvents(account)
+                                }
+                            }
+                        }
+                    }
+                    Handler(Looper.getMainLooper()).post(updateTimeRunnable)
+                }
+            }
+        } catch (e: Throwable) {
+            e.printStackTrace()
         }
     }
 
@@ -227,7 +382,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             toggleClock(true)
             true
         }
-        handler.postDelayed(timeRunnable, 0)
+        handler.post(timeRunnable)
         executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
         isAppsLoaded.observe(this, object : Observer<Boolean> {
             override fun onChanged(value: Boolean) {
@@ -255,6 +410,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewBattery.post {
             toggleClock(sharedPrefs.getBoolean("isBig", false))
         }
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail()
+            .requestScopes(Scope(CalendarScopes.CALENDAR_READONLY)).build()
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+        signIn()
     }
 
     override fun onResume() {
@@ -262,65 +421,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (isFullScreenNotificationTriggered) {
             toggleTorch.postValue(false)
             executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
+        } else if (isLoginTriggered) {
+            isLoginTriggered = false
         } else {
             proximitySensor?.also { sensor ->
                 sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
             }
         }
         isFullScreenNotificationTriggered = false
-    }
-
-    @SuppressLint("Range")
-    fun getNextCalendarEvent(): String? {
-        val now = Calendar.getInstance()
-        val today = Calendar.getInstance()
-        today.set(Calendar.HOUR_OF_DAY, 0)
-        today.set(Calendar.MINUTE, 0)
-        today.set(Calendar.SECOND, 0)
-        today.set(Calendar.MILLISECOND, 0)
-        val uri: Uri = CalendarContract.Events.CONTENT_URI
-        val projection = arrayOf(
-            CalendarContract.Events._ID,
-            CalendarContract.Events.TITLE,
-            CalendarContract.Events.DTSTART
-        )
-        val selection = "${CalendarContract.Events.DTSTART} >= ?"
-        val selectionArgs = arrayOf(now.timeInMillis.toString())
-        val cursor: Cursor? = contentResolver.query(
-            uri, projection, selection, selectionArgs, CalendarContract.Events.DTSTART
-        )
-        var nextEvent: String? = null
-        cursor?.use {
-            if (it.moveToFirst()) {
-                val title = it.getString(it.getColumnIndex(CalendarContract.Events.TITLE))
-                val startMillis = it.getLong(it.getColumnIndex(CalendarContract.Events.DTSTART))
-                // Format the event date/time
-                val startDate = Calendar.getInstance()
-                startDate.timeInMillis = startMillis
-                // Check if the event starts today
-                if (startDate.get(Calendar.YEAR) == today.get(Calendar.YEAR) && startDate.get(
-                        Calendar.MONTH
-                    ) == today.get(Calendar.MONTH) && startDate.get(Calendar.DAY_OF_MONTH) == today.get(
-                        Calendar.DAY_OF_MONTH
-                    )
-                ) {
-                    // Calculate time difference in minutes
-                    val diffMillis = startMillis - now.timeInMillis
-                    val diffMinutes = diffMillis / (1000 * 60)
-                    // Format the time until event starts
-                    if (diffMinutes <= 30) {
-                        nextEvent = "$title in $diffMinutes minutes"
-                    } else {
-                        // Format the start and end times
-                        val dateFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
-                        val startTime = dateFormat.format(startDate.time)
-                        nextEvent = "$title at $startTime"
-                    }
-                }
-            }
-        }
-        cursor?.close()
-        return nextEvent
     }
 
     private fun getCurrentBrightness(): Int {
@@ -361,15 +469,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewBattery.text =
             (if (isCharging) "Charging  -  " else "") + bm?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
                 .toString() + "%"
-        val nextEvent = getNextCalendarEvent()
-        if (nextEvent != null) {
-            // Do something with nextEvent
-            textViewInfo.text = "Upcoming event: $nextEvent"
-            textViewInfo.isVisible = true
-        } else {
-            textViewInfo.text = ""
-            textViewInfo.isVisible = false
-        }
         setAlarmInfo()
     }
 

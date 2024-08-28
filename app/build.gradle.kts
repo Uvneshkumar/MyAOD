@@ -66,4 +66,11 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.api)
     implementation(libs.shizuku.provider)
+
+    implementation(libs.google.api.services.calendar)
+    implementation(libs.play.services.auth)
+    implementation(libs.listenablefuture)
+    implementation("com.google.api-client:google-api-client-android:1.23.0") {
+        exclude("org.apache.httpcomponents")
+    }
 }
