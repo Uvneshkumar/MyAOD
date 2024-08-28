@@ -242,7 +242,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     textViewInfo.isVisible = true
                     textViewInfo.text = "No upcoming events today"
                     textViewInfo.animateAlpha(400)
-                    // TODO: No Events Today. Fetch Again after next day
+                    // No Events Today. Fetch Again after next day
                     val checkOnNextDayRunnable = object : Runnable {
                         override fun run() {
                             val currentTime = LocalTime.now()
