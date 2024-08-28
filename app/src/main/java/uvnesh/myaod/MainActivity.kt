@@ -190,6 +190,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             try {
                 val account = task.getResult(ApiException::class.java)
                 account?.let {
+                    googleSignInAccount = account
                     CoroutineScope(Dispatchers.IO).launch {
                         getCalendarEvents(it)
                     }
@@ -355,10 +356,19 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             true
         }
         notificationSmall = findViewById(R.id.notificationSmall)
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail()
-            .requestScopes(Scope(CalendarScopes.CALENDAR_READONLY)).build()
-        googleSignInClient = GoogleSignIn.getClient(this@MainActivity, gso)
-        signIn()
+        if (googleSignInAccount == null) {
+            val gso =
+                GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail()
+                    .requestScopes(Scope(CalendarScopes.CALENDAR_READONLY)).build()
+            googleSignInClient = GoogleSignIn.getClient(this@MainActivity, gso)
+            signIn()
+        } else {
+            CoroutineScope(Dispatchers.IO).launch {
+                googleSignInAccount?.let {
+                    getCalendarEvents(it)
+                }
+            }
+        }
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
         handler = Handler(Looper.getMainLooper())
@@ -628,6 +638,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         var maxAndNeededVolume: Int = 0
         var currentVolume = 0
         val toggleTorch = MutableLiveData(false)
+
+        var googleSignInAccount: GoogleSignInAccount? = null
 
         var activeNotifications: MutableLiveData<Array<StatusBarNotification>> =
             MutableLiveData(arrayOf())
