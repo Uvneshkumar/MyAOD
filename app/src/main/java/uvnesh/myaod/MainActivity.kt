@@ -466,9 +466,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val status: Int = batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
         val isCharging =
             status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
-        textViewBattery.text =
+        var chargingText =
             (if (isCharging) "Charging  -  " else "") + bm?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
                 .toString() + "%"
+        if (chargingText.contains("100")) {
+            chargingText = "Charged"
+        }
+        textViewBattery.text = chargingText
         setAlarmInfo()
     }
 
