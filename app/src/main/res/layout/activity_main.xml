@@ -81,11 +81,13 @@
         app:layout_constraintTop_toBottomOf="@id/info"
         tools:visibility="visible">
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/image_view_weather_icon"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:scaleType="centerCrop" />
+            android:background="@android:color/white"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/circleImage" />
 
         <TextView
             android:id="@+id/weather"
