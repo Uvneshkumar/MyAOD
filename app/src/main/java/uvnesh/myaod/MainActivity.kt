@@ -44,6 +44,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -60,6 +61,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
@@ -82,6 +85,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var textViewInfo: TextView
     private lateinit var textViewBattery: TextView
     private lateinit var textViewWeather: TextView
+    private lateinit var weatherRoot: LinearLayout
     private lateinit var textViewAlarm: TextView
     private lateinit var textViewTouchBlock: TextView
     private lateinit var notificationSmall: LinearLayout
@@ -101,6 +105,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var isFullScreenNotificationTriggered = false
     private var shouldTriggerLogin = false
     private var isLoginTriggered = false
+
+    private lateinit var weatherService: WeatherService
 
     private lateinit var googleSignInClient: GoogleSignInClient
     private val resultCodeGoogle = 9001
@@ -343,6 +349,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewInfo = findViewById(R.id.info)
         textViewBattery = findViewById(R.id.battery)
         textViewWeather = findViewById(R.id.weather)
+        weatherRoot = findViewById(R.id.weather_root)
         textViewAlarm = findViewById(R.id.alarm)
         textViewTouchBlock.setOnTouchListener { v, event ->
             true
@@ -392,6 +399,21 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                         setNotificationInfo()
                         notificationSmall.animateAlpha(200)
                     }
+                    weatherService =
+                        Retrofit.Builder().baseUrl("https://api.openweathermap.org/data/2.5/")
+                            .addConverterFactory(GsonConverterFactory.create()).build()
+                            .create(WeatherService::class.java)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val weatherData = weatherService.getWeather()
+                        withContext(Dispatchers.Main) {
+                            updateWeatherUI(weatherData)
+                        }
+                    }
+                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestEmail().requestScopes(Scope(CalendarScopes.CALENDAR_READONLY))
+                        .build()
+                    googleSignInClient = GoogleSignIn.getClient(this@MainActivity, gso)
+                    signIn()
                 }
             }
         })
@@ -410,10 +432,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewBattery.post {
             toggleClock(sharedPrefs.getBoolean("isBig", false))
         }
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail()
-            .requestScopes(Scope(CalendarScopes.CALENDAR_READONLY)).build()
-        googleSignInClient = GoogleSignIn.getClient(this, gso)
-        signIn()
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun updateWeatherUI(weatherData: WeatherData) {
+        textViewWeather.text = "${weatherData.main.temp.toInt()}°C"
+        val iconUrl = "https://openweathermap.org/img/w/${weatherData.weather[0].icon}.png"
+        Glide.with(this).load(iconUrl).into(findViewById(R.id.image_view_weather_icon))
+        weatherRoot.isVisible = true
+        weatherRoot.animateAlpha(400)
     }
 
     override fun onResume() {
