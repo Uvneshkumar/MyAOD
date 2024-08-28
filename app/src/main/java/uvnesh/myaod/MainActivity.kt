@@ -456,7 +456,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     @SuppressLint("SetTextI18n")
     private fun updateWeatherUI(weatherData: WeatherData) {
         textViewWeather.text = "${weatherData.main.temp.toInt()}°C"
-        val iconUrl = "https://openweathermap.org/img/w/${weatherData.weather[0].icon}.png"
+        val iconUrl =
+            "https://openweathermap.org/img/wn/${weatherData.weather.lastOrNull()?.icon}@2x.png"
         Glide.with(this).load(iconUrl).into(findViewById(R.id.image_view_weather_icon))
         weatherRoot.isVisible = true
         weatherRoot.animateAlpha(400)
