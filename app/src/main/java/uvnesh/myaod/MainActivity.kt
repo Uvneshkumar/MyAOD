@@ -272,11 +272,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                             val nextEvent = if (diffMinutes <= 0) {
                                 "Now: ${event.summary}"
                             } else if (diffMinutes <= 30) {
-                                "Upcoming event: ${event.summary} in $diffMinutes minute" + if (diffMinutes > 1) "s" else ""
+                                "${event.summary} in $diffMinutes minute" + if (diffMinutes > 1) "s" else ""
                             } else {
                                 val dateFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
                                 val startTime = dateFormat.format(startDate.time)
-                                "Upcoming event: ${event.summary} at $startTime"
+                                "${event.summary} at $startTime"
                             }
                             if (textViewInfo.isGone) {
                                 textViewInfo.isVisible = true
