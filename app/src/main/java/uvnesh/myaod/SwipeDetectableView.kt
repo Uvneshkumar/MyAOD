@@ -47,7 +47,7 @@ class SwipeDetectableView @JvmOverloads constructor(
                         }
                         return true
                     } else {
-                        if (abs(deltaX) > SWIPE_THRESHOLD_VELOCITY && abs(deltaX) > MIN_SWIPE_DISTANCE) {
+                        if (abs(deltaX) > SWIPE_THRESHOLD_VELOCITY && abs(deltaX) > MIN_SWIPE_DISTANCE_TORCH) {
                             onTorch()
                             return true
                         }
@@ -78,5 +78,6 @@ class SwipeDetectableView @JvmOverloads constructor(
     companion object {
         private const val SWIPE_THRESHOLD_VELOCITY = 100
         private const val MIN_SWIPE_DISTANCE = 100
+        private const val MIN_SWIPE_DISTANCE_TORCH = 300
     }
 }
