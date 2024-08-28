@@ -67,7 +67,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
-import java.time.LocalTime
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -98,6 +97,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private val notificationPackages = mutableListOf<String>()
 
     private lateinit var sharedPrefs: SharedPreferences
+    val hmmaFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
 
     private lateinit var sensorManager: SensorManager
     private var proximitySensor: Sensor? = null
@@ -253,9 +253,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     // No Events Today. Fetch Again after next day
                     val checkOnNextDayRunnable = object : Runnable {
                         override fun run() {
-                            val currentTime = LocalTime.now()
-                            val midnight = LocalTime.MIDNIGHT
-                            if (currentTime == midnight) {
+                            if (hmmaFormat.format(Date()) == "12:00 am") {
                                 CoroutineScope(Dispatchers.IO).launch {
                                     getCalendarEvents(account)
                                 }
@@ -285,8 +283,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                             val nextEvent = if (diffMinutes <= 30) {
                                 "${event.summary} in $diffMinutes minute" + if (diffMinutes > 1) "s" else ""
                             } else {
-                                val dateFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
-                                val startTime = dateFormat.format(startDate.time)
+                                val startTime = hmmaFormat.format(startDate.time)
                                 "${event.summary} at $startTime"
                             }
                             if (textViewInfo.isGone) {
