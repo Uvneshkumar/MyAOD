@@ -234,7 +234,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     .setMaxResults(resultsToFetch).setTimeMin(now).setOrderBy("startTime")
                     .setSingleEvents(true).execute().items
                 event = events.firstOrNull {
-                    it.attendees.find { attendee -> attendee.email == account.email }?.responseStatus.orEmpty() != "declined"
+                    val startTime = it?.start?.dateTime?.value ?: it?.start?.date?.value ?: 0
+                    it.attendees.find { attendee -> attendee.email == account.email }?.responseStatus.orEmpty() != "declined" && startTime > now.value
                 }
                 if (event == null && currentResultCount != events.size) {
                     currentResultCount = events.size
@@ -267,7 +268,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     Handler(Looper.getMainLooper()).post(checkOnNextDayRunnable)
                 } else {
                     val start = event.start?.dateTime?.value ?: event.start?.date?.value ?: 0
-                    val end = event.end?.dateTime?.value ?: event.end?.date?.value ?: 0
                     val startDate = Calendar.getInstance()
                     startDate.timeInMillis = start
                     val updateTimeRunnable = object : Runnable {
@@ -276,9 +276,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                             val diffMillis = start - now.value
                             var diffMinutes: Int = (diffMillis / (1000 * 60)).toInt()
                             diffMinutes++
-                            val nextEvent = if (diffMinutes <= 0) {
-                                "Now: ${event.summary}"
-                            } else if (diffMinutes <= 30) {
+                            if (diffMillis <= 0) {
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    getCalendarEvents(account)
+                                }
+                                return
+                            }
+                            val nextEvent = if (diffMinutes <= 30) {
                                 "${event.summary} in $diffMinutes minute" + if (diffMinutes > 1) "s" else ""
                             } else {
                                 val dateFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
@@ -292,13 +296,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                             } else if (textViewInfo.text != nextEvent) {
                                 textViewInfo.text = nextEvent
                             }
-                            if (now.value < end) {
-                                Handler(Looper.getMainLooper()).postDelayed(this, 1000)
-                            } else {
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    getCalendarEvents(account)
-                                }
-                            }
+                            Handler(Looper.getMainLooper()).postDelayed(this, 1000)
                         }
                     }
                     Handler(Looper.getMainLooper()).post(updateTimeRunnable)
