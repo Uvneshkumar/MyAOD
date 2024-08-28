@@ -355,6 +355,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             true
         }
         notificationSmall = findViewById(R.id.notificationSmall)
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail()
+            .requestScopes(Scope(CalendarScopes.CALENDAR_READONLY)).build()
+        googleSignInClient = GoogleSignIn.getClient(this@MainActivity, gso)
+        signIn()
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
         handler = Handler(Looper.getMainLooper())
@@ -399,21 +403,18 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                         setNotificationInfo()
                         notificationSmall.animateAlpha(200)
                     }
-                    weatherService =
-                        Retrofit.Builder().baseUrl("https://api.openweathermap.org/data/2.5/")
-                            .addConverterFactory(GsonConverterFactory.create()).build()
-                            .create(WeatherService::class.java)
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val weatherData = weatherService.getWeather()
-                        withContext(Dispatchers.Main) {
-                            updateWeatherUI(weatherData)
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        weatherService =
+                            Retrofit.Builder().baseUrl("https://api.openweathermap.org/data/2.5/")
+                                .addConverterFactory(GsonConverterFactory.create()).build()
+                                .create(WeatherService::class.java)
+                        CoroutineScope(Dispatchers.IO).launch {
+                            val weatherData = weatherService.getWeather()
+                            withContext(Dispatchers.Main) {
+                                updateWeatherUI(weatherData)
+                            }
                         }
-                    }
-                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestEmail().requestScopes(Scope(CalendarScopes.CALENDAR_READONLY))
-                        .build()
-                    googleSignInClient = GoogleSignIn.getClient(this@MainActivity, gso)
-                    signIn()
+                    }, 200)
                 }
             }
         })
