@@ -415,9 +415,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                                 .addConverterFactory(GsonConverterFactory.create()).build()
                                 .create(WeatherService::class.java)
                         CoroutineScope(Dispatchers.IO).launch {
-                            val weatherData = weatherService.getWeather()
-                            withContext(Dispatchers.Main) {
-                                updateWeatherUI(weatherData)
+                            try {
+                                val weatherData = weatherService.getWeather()
+                                withContext(Dispatchers.Main) {
+                                    updateWeatherUI(weatherData)
+                                }
+                            } catch (ignored: Throwable) {
                             }
                         }
                     }, 200)
