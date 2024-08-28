@@ -34,6 +34,7 @@ import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.edit
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -89,13 +90,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var textViewAlarm: TextView
     private lateinit var textViewTouchBlock: TextView
     private lateinit var notificationSmall: LinearLayout
+    private lateinit var brightnessRestore: AppCompatImageView
 
     private lateinit var handler: Handler
     private lateinit var timeRunnable: Runnable
 
     private val notificationPackages = mutableListOf<String>()
-
-    private var currentBrightness = 0
 
     private lateinit var sharedPrefs: SharedPreferences
 
@@ -356,6 +356,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             true
         }
         notificationSmall = findViewById(R.id.notificationSmall)
+        brightnessRestore = findViewById(R.id.brightnessRestore)
         if (googleSignInAccount == null) {
             val gso =
                 GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail()
@@ -436,6 +437,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             } catch (e: CameraAccessException) {
                 e.printStackTrace()
             }
+        }
+        brightnessRestore.setOnClickListener {
+            shouldShowRestoreBrightness.postValue(false)
+            executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
+        }
+        shouldShowRestoreBrightness.observe(this) {
+            brightnessRestore.isVisible = it
         }
         notificationSmall.setOnClickListener {
             executeCommand("su -c service call statusbar 1")
@@ -638,6 +646,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         var maxAndNeededVolume: Int = 0
         var currentVolume = 0
         val toggleTorch = MutableLiveData(false)
+        val shouldShowRestoreBrightness = MutableLiveData(false)
+        var currentBrightness = 0
 
         var googleSignInAccount: GoogleSignInAccount? = null
 
@@ -645,6 +655,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             MutableLiveData(arrayOf())
 
         fun executeCommand(command: String): String {
+            if (command.contains("service call statusbar 1")) {
+                executeCommand("su -c settings put system screen_brightness $currentBrightness")
+                shouldShowRestoreBrightness.postValue(true)
+            }
             try {
                 val process = Runtime.getRuntime().exec(command)
                 val reader = BufferedReader(InputStreamReader(process.inputStream))
