@@ -114,19 +114,22 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private val resultCodeGoogle = 9001
     private val scope = listOf(CalendarScopes.CALENDAR_READONLY)
 
-    private fun finishApp() {
-        textViewTouchBlock.animateAlpha(240)
-        textViewTouchBlock.isVisible = true
+    private fun finishApp(shouldMinimise: Boolean = false) {
+        if (!shouldMinimise) {
+            textViewTouchBlock.animateAlpha(240)
+            textViewTouchBlock.isVisible = true
+        }
         enableTouch()
         setDeviceVolume(maxAndNeededVolume, this)
         unlockSound.start()
         Handler(Looper.getMainLooper()).postDelayed({
             setDeviceVolume(currentVolume, this)
-            unlockSound.release()
         }, 500)
         Handler(Looper.getMainLooper()).postDelayed({
             executeCommand("su -c settings put system screen_brightness $currentBrightness")
-            finishAndRemoveTask()
+            if (!shouldMinimise) {
+                finishAndRemoveTask()
+            }
         }, 120)
     }
 
@@ -156,9 +159,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
         sensorManager.unregisterListener(this)
-        if (!isFinishing) {
-            finishApp()
-        }
+//        if (!isFinishing) {
+//            finishApp()
+        finishApp(true)
+//        }
     }
 
     private val appListItems: MutableSet<Pair<String, Drawable>> = mutableSetOf()
@@ -335,13 +339,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }, 100)
             return
         }
-        lockSound.start()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         currentBrightness = getCurrentBrightness()
         unlockSound = MediaPlayer.create(this, R.raw.unlock)
-        Handler(Looper.getMainLooper()).postDelayed({
-            setDeviceVolume(currentVolume, this)
-        }, 500)
         onBackPressedDispatcher.addCallback {}
         sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         textViewDate = findViewById(R.id.date)
@@ -399,11 +399,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         if (resources.getBoolean(R.bool.should_unlock_on_tap)) {
             findViewById<View>(R.id.fpView).setOnClickListener {
-                finishApp()
+//                finishApp()
+                executeCommand("su -c input keyevent 3")
             }
         } else {
             findViewById<View>(R.id.fpView).setOnLongClickListener {
-                finishApp()
+//                finishApp()
+                executeCommand("su -c input keyevent 3")
                 true
             }
         }
@@ -490,9 +492,24 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
+        if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
+            lockSound.start()
+            Handler(Looper.getMainLooper()).postDelayed({
+                setDeviceVolume(currentVolume, this)
+            }, 500)
+        }
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        if (currentBrightness in listOf(
+                -1,
+                resources.getInteger(R.integer.aod_brightness),
+                resources.getInteger(R.integer.aod_brightness_low)
+            )
+        ) {
+            currentBrightness = getCurrentBrightness()
+        }
+        executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
         if (isFullScreenNotificationTriggered) {
 //            toggleTorch.postValue(false)
-            executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
         } else if (isLoginTriggered) {
             isLoginTriggered = false
         } else {
@@ -694,6 +711,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onDestroy() {
         lockSound.release()
+        unlockSound.release()
         super.onDestroy()
 //        Don't kill as it delays Notifications when app is launched again
 //        executeCommand("su -c killall $packageName")
@@ -705,7 +723,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         var currentVolume = 0
         val toggleTorch = MutableLiveData(false)
         val shouldShowRestoreBrightness = MutableLiveData(false)
-        var currentBrightness = 0
+        var currentBrightness = -1
 
         var currentInfo: String? = null
         var currentInfoTime: Long = 0
