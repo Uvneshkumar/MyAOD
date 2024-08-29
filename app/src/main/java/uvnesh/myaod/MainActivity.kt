@@ -544,7 +544,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         var chargingText =
             (if (isCharging) "Charging  -  " else "") + bm?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
                 .toString() + "%"
-        if (chargingText.contains("100")) {
+        if (chargingText.contains("- 100")) {
             chargingText = "Charged"
         }
         textViewBattery.text = chargingText
