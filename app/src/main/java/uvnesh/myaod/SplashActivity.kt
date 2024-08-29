@@ -10,12 +10,7 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (resources.getBoolean(R.bool.should_lock_screen)) {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        } else {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 }
