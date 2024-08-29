@@ -466,7 +466,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onResume() {
         super.onResume()
         if (isFullScreenNotificationTriggered) {
-            toggleTorch.postValue(false)
+//            toggleTorch.postValue(false)
             executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
         } else if (isLoginTriggered) {
             isLoginTriggered = false
@@ -536,7 +536,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 isFullScreenNotificationTriggered = true
                 executeCommand("su -c settings put system screen_brightness 255")
                 Handler(Looper.getMainLooper()).postDelayed({
-                    toggleTorch.postValue(true)
+//                    toggleTorch.postValue(true)
                     executeCommand("su -c input tap 400 200")
                 }, 1000)
                 continue
