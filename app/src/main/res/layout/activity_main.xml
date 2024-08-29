@@ -58,15 +58,13 @@
         android:gravity="center_vertical"
         android:includeFontPadding="false"
         android:maxLines="1"
+        android:text="@string/info"
         android:textColor="@android:color/white"
         android:textSize="18sp"
-        android:visibility="gone"
         app:drawableStartCompat="@drawable/ic_calendar_today"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/date"
-        tools:text="Info"
-        tools:visibility="visible" />
+        app:layout_constraintTop_toBottomOf="@id/date" />
 
     <LinearLayout
         android:id="@+id/weather_root"
@@ -76,10 +74,8 @@
         android:layout_marginTop="10dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/info"
-        tools:visibility="visible">
+        app:layout_constraintTop_toBottomOf="@id/info">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/image_view_weather_icon"
@@ -96,9 +92,10 @@
             android:layout_marginStart="8dp"
             android:gravity="center_vertical"
             android:includeFontPadding="false"
+            android:text="Weather"
             android:textColor="@android:color/white"
             android:textSize="18sp"
-            tools:text="Weather" />
+            tools:ignore="HardcodedText" />
 
     </LinearLayout>
 

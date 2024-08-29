@@ -287,7 +287,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                                 val startTime = hmmaFormat.format(startDate.time)
                                 "${event.summary} at $startTime"
                             }
-                            if (textViewInfo.isGone) {
+                            if (textViewInfo.isGone || textViewInfo.text == getString(R.string.info)) {
                                 textViewInfo.isVisible = true
                                 textViewInfo.text = nextEvent
                                 textViewInfo.animateAlpha(400)
