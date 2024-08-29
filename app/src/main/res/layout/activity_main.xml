@@ -105,7 +105,7 @@
             android:layout_marginStart="8dp"
             android:gravity="center_vertical"
             android:includeFontPadding="false"
-            android:text="Weather"
+            android:text="@string/weather"
             android:textColor="@android:color/white"
             android:textSize="18sp"
             tools:ignore="HardcodedText" />

@@ -251,6 +251,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     Log.d("Calendar", "No upcoming events found")
                     infoRoot.isVisible = true
                     textViewInfo.text = "No upcoming events today"
+                    currentInfo = textViewInfo.text.toString()
+                    currentInfoTime = Long.MAX_VALUE
                     infoRoot.animateAlpha(400)
                     // No Events Today. Fetch Again after next day
                     val checkOnNextDayRunnable = object : Runnable {
@@ -291,9 +293,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                             if (infoRoot.isGone || textViewInfo.text == getString(R.string.info)) {
                                 infoRoot.isVisible = true
                                 textViewInfo.text = nextEvent
+                                currentInfo = textViewInfo.text.toString()
+                                currentInfoTime = startDate.timeInMillis
                                 infoRoot.animateAlpha(400)
                             } else if (textViewInfo.text != nextEvent) {
                                 textViewInfo.text = nextEvent
+                                currentInfo = textViewInfo.text.toString()
+                                currentInfoTime = startDate.timeInMillis
                             }
                             Handler(Looper.getMainLooper()).postDelayed(this, 1000)
                         }
@@ -362,6 +368,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         notificationSmall = findViewById(R.id.notificationSmall)
         brightnessRestore = findViewById(R.id.brightnessRestore)
+        currentWeather?.let { updateWeatherUI(it) }
+        currentInfo?.let {
+            if (textViewInfo.text == getString(R.string.info) && (Date().time < currentInfoTime)) {
+                textViewInfo.text = it
+            }
+        }
         if (googleSignInAccount == null) {
             val gso =
                 GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail()
@@ -464,6 +476,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     @SuppressLint("SetTextI18n")
     private fun updateWeatherUI(weatherData: WeatherData) {
+        if (currentWeather == weatherData && textViewWeather.text != getString(R.string.weather)) return
+        currentWeather = weatherData
         textViewWeather.text = "${weatherData.main.temp.toInt()}°C"
         val iconUrl =
             "https://openweathermap.org/img/wn/${weatherData.weather.firstOrNull()?.icon}@2x.png"
@@ -690,6 +704,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val toggleTorch = MutableLiveData(false)
         val shouldShowRestoreBrightness = MutableLiveData(false)
         var currentBrightness = 0
+
+        var currentInfo: String? = null
+        var currentInfoTime: Long = 0
+        var currentWeather: WeatherData? = null
 
         var googleSignInAccount: GoogleSignInAccount? = null
 
