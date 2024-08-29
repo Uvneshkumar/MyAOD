@@ -368,7 +368,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         notificationSmall = findViewById(R.id.notificationSmall)
         brightnessRestore = findViewById(R.id.brightnessRestore)
-        currentWeather?.let { updateWeatherUI(it) }
+        currentWeather?.let { updateWeatherUI(it, false) }
         currentInfo?.let {
             if (textViewInfo.text == getString(R.string.info) && (Date().time < currentInfoTime)) {
                 textViewInfo.text = it
@@ -475,7 +475,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun updateWeatherUI(weatherData: WeatherData) {
+    private fun updateWeatherUI(weatherData: WeatherData, shouldAnimate: Boolean = true) {
         if (currentWeather == weatherData && textViewWeather.text != getString(R.string.weather)) return
         currentWeather = weatherData
         textViewWeather.text = "${weatherData.main.temp.toInt()}°C"
@@ -483,7 +483,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             "https://openweathermap.org/img/wn/${weatherData.weather.firstOrNull()?.icon}@2x.png"
         Glide.with(this).load(iconUrl).into(findViewById(R.id.image_view_weather_icon))
         weatherRoot.isVisible = true
-        weatherRoot.animateAlpha(400)
+        if (shouldAnimate) {
+            weatherRoot.animateAlpha(400)
+        }
     }
 
     override fun onResume() {
