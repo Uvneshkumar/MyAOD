@@ -493,6 +493,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onResume() {
         super.onResume()
         if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
+            currentVolume = getCurrentDeviceVolume(this)
+            maxAndNeededVolume =
+                (maxAndNeededVolume * resources.getInteger(R.integer.volume_percentage) / 100.0).toInt()
+            setDeviceVolume(maxAndNeededVolume, this)
             lockSound.start()
             Handler(Looper.getMainLooper()).postDelayed({
                 setDeviceVolume(currentVolume, this)
@@ -765,6 +769,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             val audioManager =
                 applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
             audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, volumeLevel, 0)
+        }
+
+        fun getCurrentDeviceVolume(applicationContext: Context): Int {
+            val audioManager =
+                applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+            maxAndNeededVolume = audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC) ?: 0
+            return audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC) ?: -1
         }
     }
 
