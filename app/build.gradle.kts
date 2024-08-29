@@ -22,7 +22,7 @@ android {
             keyAlias = "Uvnesh"
             keyPassword = "android"
             storePassword = "android"
-            storeFile = File("D:\\Work\\Uvnesh.jks")
+            storeFile = File("C:\\Users\\Uvnesh\\Desktop\\Work\\Uvnesh.jks")
         }
     }
 
@@ -33,6 +33,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
         debug {
             signingConfig = signingConfigs.getByName("debug")
