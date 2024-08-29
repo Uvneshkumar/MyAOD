@@ -533,9 +533,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         for (notification in activeNotifications.value.orEmpty()) {
             if (notification.notification?.fullScreenIntent != null && notification.notification.channelId == "Firing" && notification.packageName == "com.google.android.deskclock" && notification.notification.actions?.size == 2) {
                 // Max Brightness to make Alarm more "disturbing"
+                isFullScreenNotificationTriggered = true
                 executeCommand("su -c settings put system screen_brightness 255")
                 Handler(Looper.getMainLooper()).postDelayed({
-                    isFullScreenNotificationTriggered = true
                     toggleTorch.postValue(true)
                     executeCommand("su -c input tap 400 200")
                 }, 1000)
@@ -634,7 +634,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     textViewTouchBlock.isVisible = false
                     enableTouch()
                 }
-            } else if (canChange && it.sensor.type == Sensor.TYPE_LIGHT) {
+            } else if (canChange && !isFullScreenNotificationTriggered && it.sensor.type == Sensor.TYPE_LIGHT) {
                 val localCurrentBrightness = getCurrentBrightness()
                 if (it.values[0] <= 5 && localCurrentBrightness != resources.getInteger(R.integer.aod_brightness_low) && localCurrentBrightness != currentBrightness && shouldShowRestoreBrightness.value != true) {
                     canChange = false
