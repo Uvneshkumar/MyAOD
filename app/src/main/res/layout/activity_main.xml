@@ -24,12 +24,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="36dp"
-        android:fontFamily="@font/productsans_thin"
+        android:fontFamily="@font/googlesansclock"
         android:gravity="center_vertical"
         android:includeFontPadding="false"
         android:paddingBottom="10dp"
         android:textColor="@android:color/white"
         android:textSize="94sp"
+        android:visibility="gone"
+        app:fontVariationSettings="'wght' 100"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/topMargin" />
 
@@ -131,13 +133,13 @@
             android:id="@+id/largeTimeHoursOne"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/productsans_thin"
+            android:fontFamily="@font/googlesansclock"
             android:gravity="center"
             android:includeFontPadding="false"
             android:minWidth="112dp"
             android:textColor="@android:color/white"
             android:textSize="180sp"
-            android:visibility="gone"
+            app:fontVariationSettings="'wght' 100"
             tools:text="0" />
 
         <TextView
@@ -145,13 +147,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="-10dp"
-            android:fontFamily="@font/productsans_thin"
+            android:fontFamily="@font/googlesansclock"
             android:gravity="center"
             android:includeFontPadding="false"
             android:minWidth="112dp"
             android:textColor="@android:color/white"
             android:textSize="180sp"
-            android:visibility="gone"
+            app:fontVariationSettings="'wght' 100"
             tools:text="1" />
 
     </LinearLayout>
@@ -160,7 +162,7 @@
         android:id="@+id/largeTimeMinutesRoot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-70dp"
+        android:layout_marginTop="-60dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -170,13 +172,13 @@
             android:id="@+id/largeTimeMinutesOne"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/productsans_thin"
+            android:fontFamily="@font/googlesansclock"
             android:gravity="center"
             android:includeFontPadding="false"
             android:minWidth="112dp"
             android:textColor="@android:color/white"
             android:textSize="180sp"
-            android:visibility="gone"
+            app:fontVariationSettings="'wght' 100"
             tools:text="0" />
 
         <TextView
@@ -184,13 +186,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="-10dp"
-            android:fontFamily="@font/productsans_thin"
+            android:fontFamily="@font/googlesansclock"
             android:gravity="center"
             android:includeFontPadding="false"
             android:minWidth="112dp"
             android:textColor="@android:color/white"
             android:textSize="180sp"
-            android:visibility="gone"
+            app:fontVariationSettings="'wght' 100"
             tools:text="1" />
 
     </LinearLayout>
