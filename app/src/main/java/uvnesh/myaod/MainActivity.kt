@@ -101,6 +101,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
     private var proximitySensor: Sensor? = null
+    private var lightSensor: Sensor? = null
 
     private var isFullScreenNotificationTriggered = false
     private var shouldTriggerLogin = false
@@ -367,6 +368,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
+        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
         handler = Handler(Looper.getMainLooper())
         timeRunnable = object : Runnable {
             override fun run() {
@@ -470,6 +472,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             isLoginTriggered = false
         } else {
             proximitySensor?.also { sensor ->
+                sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+            }
+            lightSensor?.also { sensor ->
                 sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
             }
         }
@@ -612,6 +617,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewLargeTimeMinutesTwo.isVisible = showBigClock
     }
 
+    var canChange = true
+
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
             if (it.sensor.type == Sensor.TYPE_PROXIMITY && resources.getBoolean(R.bool.should_use_proximity)) {
@@ -626,6 +633,32 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     // Add your logic here
                     textViewTouchBlock.isVisible = false
                     enableTouch()
+                }
+            } else if (canChange && it.sensor.type == Sensor.TYPE_LIGHT) {
+                if (it.values[0] <= 5 && getCurrentBrightness() != resources.getInteger(R.integer.aod_brightness_low) && shouldShowRestoreBrightness.value != true) {
+                    canChange = false
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        canChange = true
+                    }, 5000)
+                    executeCommand(
+                        "su -c settings put system screen_brightness ${
+                            resources.getInteger(
+                                R.integer.aod_brightness_low
+                            )
+                        }"
+                    )
+                } else if (it.values[0] > 5 && getCurrentBrightness() != resources.getInteger(R.integer.aod_brightness) && shouldShowRestoreBrightness.value != true) {
+                    canChange = false
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        canChange = true
+                    }, 5000)
+                    executeCommand(
+                        "su -c settings put system screen_brightness ${
+                            resources.getInteger(
+                                R.integer.aod_brightness
+                            )
+                        }"
+                    )
                 }
             }
         }
