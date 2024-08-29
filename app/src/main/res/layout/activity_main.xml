@@ -48,25 +48,36 @@
         app:layout_constraintTop_toBottomOf="@id/smallTime"
         tools:text="Fri, 12 Jul" />
 
-    <TextView
-        android:id="@+id/info"
+    <LinearLayout
+        android:id="@+id/info_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="40dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="40dp"
-        android:drawablePadding="8dp"
-        android:ellipsize="end"
-        android:gravity="center_vertical"
-        android:includeFontPadding="false"
-        android:maxLines="1"
-        android:text="@string/info"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        app:drawableStartCompat="@drawable/ic_calendar_today"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/date" />
+        app:layout_constraintTop_toBottomOf="@id/date">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/info_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            app:srcCompat="@drawable/ic_calendar_today" />
+
+        <TextView
+            android:id="@+id/info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:includeFontPadding="false"
+            android:text="@string/info"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            tools:ignore="HardcodedText" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/weather_root"
@@ -77,7 +88,7 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/info">
+        app:layout_constraintTop_toBottomOf="@id/info_root">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/image_view_weather_icon"

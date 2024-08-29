@@ -86,6 +86,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var textViewBattery: TextView
     private lateinit var textViewWeather: TextView
     private lateinit var weatherRoot: LinearLayout
+    private lateinit var infoRoot: LinearLayout
     private lateinit var textViewAlarm: TextView
     private lateinit var textViewTouchBlock: TextView
     private lateinit var notificationSmall: LinearLayout
@@ -248,9 +249,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             withContext(Dispatchers.Main) {
                 if (event == null) {
                     Log.d("Calendar", "No upcoming events found")
-                    textViewInfo.isVisible = true
+                    infoRoot.isVisible = true
                     textViewInfo.text = "No upcoming events today"
-                    textViewInfo.animateAlpha(400)
+                    infoRoot.animateAlpha(400)
                     // No Events Today. Fetch Again after next day
                     val checkOnNextDayRunnable = object : Runnable {
                         override fun run() {
@@ -287,10 +288,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                                 val startTime = hmmaFormat.format(startDate.time)
                                 "${event.summary} at $startTime"
                             }
-                            if (textViewInfo.isGone || textViewInfo.text == getString(R.string.info)) {
-                                textViewInfo.isVisible = true
+                            if (infoRoot.isGone || textViewInfo.text == getString(R.string.info)) {
+                                infoRoot.isVisible = true
                                 textViewInfo.text = nextEvent
-                                textViewInfo.animateAlpha(400)
+                                infoRoot.animateAlpha(400)
                             } else if (textViewInfo.text != nextEvent) {
                                 textViewInfo.text = nextEvent
                             }
@@ -346,7 +347,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewInfo = findViewById(R.id.info)
         textViewBattery = findViewById(R.id.battery)
         textViewWeather = findViewById(R.id.weather)
+        textViewWeather.post {
+            findViewById<AppCompatImageView>(R.id.info_icon).apply {
+                layoutParams = layoutParams.apply {
+                    height = textViewWeather.measuredHeight
+                }
+            }
+        }
         weatherRoot = findViewById(R.id.weather_root)
+        infoRoot = findViewById(R.id.info_root)
         textViewAlarm = findViewById(R.id.alarm)
         textViewTouchBlock.setOnTouchListener { v, event ->
             true
