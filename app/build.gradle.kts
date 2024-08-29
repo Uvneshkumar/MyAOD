@@ -38,6 +38,12 @@ android {
         debug {
             signingConfig = signingConfigs.getByName("debug")
         }
+        create("lemonadep") {
+            initWith(getByName("release"))
+        }
+        create("walleye") {
+            initWith(getByName("release"))
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -51,7 +57,7 @@ android {
         val variant = this
         variant.outputs.map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
             .forEach { output ->
-                val outputFileName = "MyAOD.apk"
+                val outputFileName = "MyAOD-${variant.buildType.name}.apk"
                 output.outputFileName = outputFileName
             }
     }
