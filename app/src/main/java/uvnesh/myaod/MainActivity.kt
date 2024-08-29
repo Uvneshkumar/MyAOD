@@ -635,7 +635,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     enableTouch()
                 }
             } else if (canChange && it.sensor.type == Sensor.TYPE_LIGHT) {
-                if (it.values[0] <= 5 && getCurrentBrightness() != resources.getInteger(R.integer.aod_brightness_low) && shouldShowRestoreBrightness.value != true) {
+                val localCurrentBrightness = getCurrentBrightness()
+                if (it.values[0] <= 5 && localCurrentBrightness != resources.getInteger(R.integer.aod_brightness_low) && localCurrentBrightness != currentBrightness && shouldShowRestoreBrightness.value != true) {
                     canChange = false
                     Handler(Looper.getMainLooper()).postDelayed({
                         canChange = true
@@ -647,7 +648,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                             )
                         }"
                     )
-                } else if (it.values[0] > 5 && getCurrentBrightness() != resources.getInteger(R.integer.aod_brightness) && shouldShowRestoreBrightness.value != true) {
+                } else if (it.values[0] > 5 && localCurrentBrightness != resources.getInteger(R.integer.aod_brightness) && localCurrentBrightness != currentBrightness && shouldShowRestoreBrightness.value != true) {
                     canChange = false
                     Handler(Looper.getMainLooper()).postDelayed({
                         canChange = true
