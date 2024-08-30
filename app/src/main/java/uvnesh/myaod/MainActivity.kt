@@ -723,8 +723,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     companion object {
 
-        const val channelId = "KEEP_RUNNING"
-
         var maxAndNeededVolume: Int = 0
         var currentVolume = 0
         val toggleTorch = MutableLiveData(false)
