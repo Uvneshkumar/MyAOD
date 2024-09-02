@@ -89,6 +89,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var infoRoot: LinearLayout
     private lateinit var textViewAlarm: TextView
     private lateinit var textViewTouchBlock: TextView
+    private lateinit var rootAnim: View
     private lateinit var notificationSmall: LinearLayout
     private lateinit var brightnessRestore: AppCompatImageView
     private lateinit var brightnessRestoreRoot: View
@@ -317,6 +318,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    private fun goHome() {
+        rootAnim.isVisible = true
+        executeCommand("su -c input keyevent 3")
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -333,6 +339,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             loadAppIcons()
         }
         textViewTouchBlock = findViewById(R.id.touchBlock)
+        rootAnim = findViewById(R.id.rootAnim)
         if (resources.getBoolean(R.bool.should_lock_screen)) {
             textViewTouchBlock.isVisible = true
             Handler(Looper.getMainLooper()).postDelayed({
@@ -406,12 +413,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (resources.getBoolean(R.bool.should_unlock_on_tap)) {
             findViewById<View>(R.id.fpView).setOnClickListener {
 //                finishApp()
-                executeCommand("su -c input keyevent 3")
+                goHome()
             }
         } else {
             findViewById<View>(R.id.fpView).setOnLongClickListener {
 //                finishApp()
-                executeCommand("su -c input keyevent 3")
+                goHome()
                 true
             }
         }
@@ -499,6 +506,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
+        updateDateTime()
+        textViewSmallTime.post {
+            rootAnim.animateAlpha(0, true)
+        }
         if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
             currentVolume = getCurrentDeviceVolume(this)
             maxAndNeededVolume =
@@ -556,12 +567,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             currentTime = "0$currentTime"
         }
         textViewDate.text = currentDate
-        textViewSmallTime.text =
-            if (currentTime.startsWith("0")) currentTime.substringAfter("0") else currentTime
         textViewLargeTimeHoursOne.text = currentTime.substring(0, 1)
         textViewLargeTimeHoursTwo.text = currentTime.substring(1, 2)
         textViewLargeTimeMinutesOne.text = currentTime.substring(3, 4)
         textViewLargeTimeMinutesTwo.text = currentTime.substring(4, 5)
+        textViewSmallTime.text =
+            if (currentTime.startsWith("0")) currentTime.substringAfter("0") else currentTime
         val bm = getSystemService(BATTERY_SERVICE) as? BatteryManager
         val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { ifilter ->
             applicationContext.registerReceiver(null, ifilter)
