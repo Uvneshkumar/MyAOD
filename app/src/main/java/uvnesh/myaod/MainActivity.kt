@@ -318,9 +318,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    private var isHome = false
+
     private fun goHome() {
+        isHome = true
+        rootAnim.alpha = 0f
         rootAnim.isVisible = true
-        executeCommand("su -c input keyevent 3")
+        rootAnim.animateAlpha(0) {
+            executeCommand("su -c input keyevent 3")
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -508,7 +514,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         super.onResume()
         updateDateTime()
         textViewSmallTime.post {
-            rootAnim.animateAlpha(0, true)
+            if (isHome) {
+                isHome = false
+                rootAnim.animateAlpha(0, true)
+            }
         }
         if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
             currentVolume = getCurrentDeviceVolume(this)
@@ -802,7 +811,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 val Int.dp: Int get() = (this / getSystem().displayMetrics.density).toInt()
 val Int.px: Int get() = (this * getSystem().displayMetrics.density).toInt()
 
-fun View.animateAlpha(duration: Long = 100, isReverse: Boolean = false) {
+fun View.animateAlpha(
+    duration: Long = 100, isReverse: Boolean = false, postCompletion: () -> Unit = {}
+) {
     alpha = if (isReverse) 1f else 0f
     Handler(Looper.getMainLooper()).post {
         animate().alpha(if (isReverse) 0f else 1f).setListener(object : Animator.AnimatorListener {
@@ -813,6 +824,7 @@ fun View.animateAlpha(duration: Long = 100, isReverse: Boolean = false) {
                 if (isReverse) {
                     this@animateAlpha.isVisible = false
                 }
+                postCompletion()
             }
         }).duration = duration
     }
