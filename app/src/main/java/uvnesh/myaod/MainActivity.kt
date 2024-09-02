@@ -329,9 +329,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun goHome() {
         unlockSound()
         isHome = true
-        rootAnim.alpha = 0f
         rootAnim.isVisible = true
-        rootAnim.animateAlpha(0) {
+        rootAnim.post {
             executeCommand("su -c input keyevent 3")
         }
     }
@@ -523,7 +522,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewSmallTime.post {
             if (isHome) {
                 isHome = false
-                rootAnim.animateAlpha(0, true)
+                rootAnim.isVisible = false
             }
         }
         if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
