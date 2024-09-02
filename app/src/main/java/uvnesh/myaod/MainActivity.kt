@@ -123,10 +123,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         enableTouch()
         setDeviceVolume(maxAndNeededVolume, this)
-        unlockSound.start()
-        Handler(Looper.getMainLooper()).postDelayed({
-            setDeviceVolume(currentVolume, this)
-        }, 500)
+        if (!isHome) {
+            unlockSound()
+        }
         Handler(Looper.getMainLooper()).postDelayed({
             executeCommand("su -c settings put system screen_brightness $currentBrightness")
             if (!shouldMinimise) {
@@ -320,7 +319,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private var isHome = false
 
+    private fun unlockSound() {
+        unlockSound.start()
+        Handler(Looper.getMainLooper()).postDelayed({
+            setDeviceVolume(currentVolume, this)
+        }, 500)
+    }
+
     private fun goHome() {
+        unlockSound()
         isHome = true
         rootAnim.alpha = 0f
         rootAnim.isVisible = true
