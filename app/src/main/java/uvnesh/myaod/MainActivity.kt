@@ -388,8 +388,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
-        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+        if (resources.getBoolean(R.bool.should_use_proximity)) {
+            proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
+        }
+        if (resources.getBoolean(R.bool.should_use_light)) {
+            lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+        }
         handler = Handler(Looper.getMainLooper())
         timeRunnable = object : Runnable {
             override fun run() {
@@ -667,7 +671,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
-            if (it.sensor.type == Sensor.TYPE_PROXIMITY && resources.getBoolean(R.bool.should_use_proximity)) {
+            if (it.sensor.type == Sensor.TYPE_PROXIMITY) {
                 // "it.values[0]" gives you the proximity distance in centimeters
                 if (it.values[0] <= 0f) {
                     // Proximity sensor is covered
