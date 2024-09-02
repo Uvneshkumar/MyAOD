@@ -91,7 +91,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var textViewTouchBlock: TextView
     private lateinit var rootAnim: View
     private lateinit var notificationSmall: LinearLayout
-    private lateinit var brightnessRestore: AppCompatImageView
     private lateinit var brightnessRestoreRoot: View
 
     private lateinit var handler: Handler
@@ -387,7 +386,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             true
         }
         notificationSmall = findViewById(R.id.notificationSmall)
-        brightnessRestore = findViewById(R.id.brightnessRestore)
         brightnessRestoreRoot = findViewById(R.id.brightnessRestoreRoot)
         currentWeather?.let { updateWeatherUI(it, false) }
         currentInfo?.let {
@@ -491,7 +489,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
         }
         shouldShowRestoreBrightness.observe(this) {
-            brightnessRestore.isVisible = it
             brightnessRestoreRoot.isVisible = it
         }
         notificationSmall.setOnClickListener {
