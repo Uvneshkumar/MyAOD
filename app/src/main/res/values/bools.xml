@@ -5,4 +5,5 @@
     <bool name="should_use_proximity">true</bool>
     <bool name="should_use_light">false</bool>
     <bool name="should_animate_layout_changes">true</bool>
+    <bool name="should_use_torch">true</bool>
 </resources>

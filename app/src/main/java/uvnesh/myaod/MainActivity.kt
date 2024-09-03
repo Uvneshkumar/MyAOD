@@ -492,12 +492,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         })
         toggleTorch.observe(this) {
-            val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
-            val cameraId = cameraManager.cameraIdList.firstOrNull() ?: return@observe
-            try {
-                cameraManager.setTorchMode(cameraId, it)
-            } catch (e: CameraAccessException) {
-                e.printStackTrace()
+            if (resources.getBoolean(R.bool.should_use_torch)) {
+                val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+                val cameraId = cameraManager.cameraIdList.firstOrNull() ?: return@observe
+                try {
+                    cameraManager.setTorchMode(cameraId, it)
+                } catch (e: CameraAccessException) {
+                    e.printStackTrace()
+                }
             }
         }
         brightnessRestoreRoot.setOnClickListener {
