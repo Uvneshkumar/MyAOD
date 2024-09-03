@@ -359,7 +359,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             return
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        currentBrightness = getCurrentBrightness()
         unlockSound = MediaPlayer.create(this, R.raw.unlock)
         onBackPressedDispatcher.addCallback {}
         sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
@@ -524,6 +523,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
             currentVolume = getCurrentDeviceVolume(this)
+            currentBrightness = getCurrentBrightness()
             maxAndNeededVolume =
                 (maxAndNeededVolume * resources.getInteger(R.integer.volume_percentage) / 100.0).toInt()
             setDeviceVolume(maxAndNeededVolume, this)
@@ -533,14 +533,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }, 500)
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        if (currentBrightness in listOf(
-                -1,
-                resources.getInteger(R.integer.aod_brightness),
-                resources.getInteger(R.integer.aod_brightness_low)
-            )
-        ) {
-            currentBrightness = getCurrentBrightness()
-        }
         executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
         if (isFullScreenNotificationTriggered) {
 //            toggleTorch.postValue(false)
