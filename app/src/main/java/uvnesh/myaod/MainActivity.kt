@@ -121,9 +121,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             textViewTouchBlock.isVisible = true
         }
         enableTouch()
-        setDeviceVolume(maxAndNeededVolume, this)
         if (!isHome) {
-            unlockSound()
+            playSound(false)
         }
         Handler(Looper.getMainLooper()).postDelayed({
             executeCommand("su -c settings put system screen_brightness $currentBrightness")
@@ -318,20 +317,30 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private var isHome = false
 
-    private fun unlockSound() {
-        unlockSound.start()
-        Handler(Looper.getMainLooper()).postDelayed({
-            setDeviceVolume(currentVolume, this)
-        }, 500)
+    private fun playSound(isLock: Boolean = true) {
+        if (isRingerModeNormal()) {
+            setDeviceVolume(maxAndNeededVolume, this)
+            if (isLock) {
+                lockSound.start()
+            } else {
+                unlockSound.start()
+            }
+        }
     }
 
     private fun goHome() {
-        unlockSound()
+        playSound(false)
         isHome = true
         rootAnim.isVisible = true
         rootAnim.post {
             executeCommand("su -c input keyevent 3")
         }
+    }
+
+    private fun isRingerModeNormal(): Boolean {
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val ringerMode = audioManager.ringerMode
+        return ringerMode == AudioManager.RINGER_MODE_NORMAL
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -361,6 +370,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         unlockSound = MediaPlayer.create(this, R.raw.unlock)
         onBackPressedDispatcher.addCallback {}
+        lockSound.setOnCompletionListener {
+            setDeviceVolume(currentVolume, this)
+        }
+        unlockSound.setOnCompletionListener {
+            setDeviceVolume(currentVolume, this)
+        }
         sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         textViewDate = findViewById(R.id.date)
         textViewSmallTime = findViewById(R.id.smallTime)
@@ -526,11 +541,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             currentBrightness = getCurrentBrightness()
             maxAndNeededVolume =
                 (maxAndNeededVolume * resources.getInteger(R.integer.volume_percentage) / 100.0).toInt()
-            setDeviceVolume(maxAndNeededVolume, this)
-            lockSound.start()
-            Handler(Looper.getMainLooper()).postDelayed({
-                setDeviceVolume(currentVolume, this)
-            }, 500)
+            playSound()
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
