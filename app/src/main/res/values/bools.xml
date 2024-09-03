@@ -4,4 +4,5 @@
     <bool name="should_unlock_on_tap">true</bool>
     <bool name="should_use_proximity">true</bool>
     <bool name="should_use_light">false</bool>
+    <bool name="should_animate_layout_changes">true</bool>
 </resources>

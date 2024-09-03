@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="false"
+    android:animateLayoutChanges="@bool/should_animate_layout_changes"
     android:background="@android:color/black"
     tools:context=".MainActivity">
 
