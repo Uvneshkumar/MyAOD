@@ -1,6 +1,7 @@
 package uvnesh.myaod
 
 import android.animation.Animator
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.content.Context
@@ -334,6 +335,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         isHome = true
         rootAnim.isVisible = true
         rootAnim.post {
+            findViewById<View>(R.id.main).translationY = topMargin
             executeCommand("su -c input keyevent 3")
         }
     }
@@ -356,6 +358,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
         lockSound = MediaPlayer.create(this, R.raw.lock)
         setContentView(R.layout.activity_main)
+        findViewById<View>(android.R.id.content).setBackgroundColor(getColor(android.R.color.black))
         lifecycleScope.launch {
             loadAppIcons()
         }
@@ -531,6 +534,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    private val topMargin = 60.px.toFloat()
+
     override fun onResume() {
         super.onResume()
         updateDateTime()
@@ -538,6 +543,36 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             if (isHome) {
                 isHome = false
                 rootAnim.isVisible = false
+                findViewById<View>(R.id.main).apply {
+                    val animator = ObjectAnimator.ofFloat(this@apply, "translationY", topMargin, 0f)
+                    animator.duration = 600
+                    animator.addListener(object : Animator.AnimatorListener {
+                        override fun onAnimationStart(animation: Animator) {}
+                        override fun onAnimationEnd(animation: Animator) {
+                            if (isFullScreenNotificationTriggered) {
+//                                    toggleTorch.postValue(false)
+                            } else if (isLoginTriggered) {
+                                isLoginTriggered = false
+                            } else {
+                                proximitySensor?.also { sensor ->
+                                    sensorManager.registerListener(
+                                        this@MainActivity, sensor, SensorManager.SENSOR_DELAY_NORMAL
+                                    )
+                                }
+                                lightSensor?.also { sensor ->
+                                    sensorManager.registerListener(
+                                        this@MainActivity, sensor, SensorManager.SENSOR_DELAY_NORMAL
+                                    )
+                                }
+                            }
+                            isFullScreenNotificationTriggered = false
+                        }
+
+                        override fun onAnimationCancel(animation: Animator) {}
+                        override fun onAnimationRepeat(animation: Animator) {}
+                    })
+                    animator.start()
+                }
             }
         }
         if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
@@ -547,21 +582,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 (maxAndNeededVolume * resources.getInteger(R.integer.volume_percentage) / 100.0).toInt()
             playSound()
         }
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
-        if (isFullScreenNotificationTriggered) {
-//            toggleTorch.postValue(false)
-        } else if (isLoginTriggered) {
-            isLoginTriggered = false
-        } else {
-            proximitySensor?.also { sensor ->
-                sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
-            }
-            lightSensor?.also { sensor ->
-                sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
-            }
-        }
-        isFullScreenNotificationTriggered = false
     }
 
     private fun getCurrentBrightness(): Int {

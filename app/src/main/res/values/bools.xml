@@ -3,8 +3,8 @@
     <bool name="should_lock_screen">false</bool>
     <bool name="should_unlock_on_tap">true</bool>
     <bool name="should_use_proximity">true</bool>
-    <bool name="should_use_light">false</bool>
-    <bool name="should_animate_layout_changes">true</bool>
+    <bool name="should_use_light">true</bool>
+    <bool name="should_animate_layout_changes">false</bool>
     <bool name="should_use_torch">true</bool>
     <bool name="should_minimise">true</bool>
 </resources>
