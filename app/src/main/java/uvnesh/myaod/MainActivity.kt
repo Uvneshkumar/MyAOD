@@ -333,6 +333,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun goHome() {
         playSound(false)
         isHome = true
+        rootAnim.alpha = 1f
         rootAnim.isVisible = true
         rootAnim.post {
             findViewById<View>(R.id.main).translationY = topMargin
@@ -534,18 +535,19 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private val topMargin = 60.px.toFloat()
+    private val topMargin = 100.px.toFloat()
 
     override fun onResume() {
         super.onResume()
         updateDateTime()
+        rootAnim.alpha = 1f
         textViewSmallTime.post {
             if (isHome) {
                 isHome = false
-                rootAnim.isVisible = false
+                rootAnim.animateAlpha(500, true)
                 findViewById<View>(R.id.main).apply {
                     val animator = ObjectAnimator.ofFloat(this@apply, "translationY", topMargin, 0f)
-                    animator.duration = 600
+                    animator.duration = 500
                     animator.addListener(object : Animator.AnimatorListener {
                         override fun onAnimationStart(animation: Animator) {}
                         override fun onAnimationEnd(animation: Animator) {
