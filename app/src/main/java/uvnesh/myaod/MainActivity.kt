@@ -126,6 +126,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         Handler(Looper.getMainLooper()).postDelayed({
             executeCommand("su -c settings put system screen_brightness $currentBrightness")
+            currentBrightness = -1
             if (!shouldMinimise) {
                 finishAndRemoveTask()
             }
@@ -368,6 +369,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             return
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        currentBrightness = getCurrentBrightness()
         unlockSound = MediaPlayer.create(this, R.raw.unlock)
         onBackPressedDispatcher.addCallback {}
         lockSound.setOnCompletionListener {
@@ -538,7 +540,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
             currentVolume = getCurrentDeviceVolume(this)
-            currentBrightness = getCurrentBrightness()
+            if (currentBrightness == -1) currentBrightness = getCurrentBrightness()
             maxAndNeededVolume =
                 (maxAndNeededVolume * resources.getInteger(R.integer.volume_percentage) / 100.0).toInt()
             playSound()
