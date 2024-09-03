@@ -161,7 +161,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         sensorManager.unregisterListener(this)
 //        if (!isFinishing) {
 //            finishApp()
-        finishApp(true)
+        finishApp(resources.getBoolean(R.bool.should_minimise))
 //        }
     }
 
