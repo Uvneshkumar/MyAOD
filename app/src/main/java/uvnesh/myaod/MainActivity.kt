@@ -290,7 +290,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                                 return
                             }
                             val nextEvent = if (diffMinutes <= 30) {
-                                "${event.summary} in $diffMinutes minute" + if (diffMinutes > 1) "s" else ""
+                                "${event.summary} in $diffMinutes min" + if (diffMinutes > 1) "s" else ""
                             } else {
                                 val startTime = hmmaFormat.format(startDate.time)
                                 "${event.summary} at $startTime"
