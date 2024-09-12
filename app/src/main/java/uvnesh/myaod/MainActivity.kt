@@ -312,7 +312,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var isHome = false
 
     private fun playSound(isLock: Boolean = true) {
-        if (isRingerModeNormal()) {
+        if (resources.getBoolean(R.bool.should_use_volume) && isRingerModeNormal()) {
             setDeviceVolume(maxAndNeededVolume, this)
             if (isLock) {
                 lockSound.start()
