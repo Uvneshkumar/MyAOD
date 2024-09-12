@@ -452,20 +452,22 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 true
             }
         }
-        listOf(
-            findViewById<ViewGroup>(R.id.largeTimeHoursRoot),
-            findViewById<ViewGroup>(R.id.largeTimeMinutesRoot)
-        ).forEach {
-            it.forEach {
-                it.setOnLongClickListener {
-                    toggleClock(false)
-                    true
+        if (resources.getBoolean(R.bool.should_allow_clock_switching)) {
+            listOf(
+                findViewById<ViewGroup>(R.id.largeTimeHoursRoot),
+                findViewById<ViewGroup>(R.id.largeTimeMinutesRoot)
+            ).forEach {
+                it.forEach {
+                    it.setOnLongClickListener {
+                        toggleClock(false)
+                        true
+                    }
                 }
             }
-        }
-        textViewSmallTime.setOnLongClickListener {
-            toggleClock(true)
-            true
+            textViewSmallTime.setOnLongClickListener {
+                toggleClock(true)
+                true
+            }
         }
         handler.post(timeRunnable)
         executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
