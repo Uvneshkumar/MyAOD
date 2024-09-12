@@ -81,39 +81,6 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/weather_root"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="10dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/info_root">
-
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/image_view_weather_icon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:background="@android:color/white"
-            android:scaleType="centerCrop"
-            app:shapeAppearanceOverlay="@style/circleImage" />
-
-        <TextView
-            android:id="@+id/weather"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:gravity="center_vertical"
-            android:includeFontPadding="false"
-            android:text="@string/weather"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            tools:ignore="HardcodedText" />
-
-    </LinearLayout>
-
     <TextView
         android:id="@+id/alarm"
         android:layout_width="wrap_content"
@@ -128,7 +95,7 @@
         android:visibility="gone"
         app:drawableStartCompat="@drawable/ic_alarm"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/weather_root"
+        app:layout_constraintTop_toBottomOf="@id/info_root"
         tools:text="Alarm"
         tools:visibility="visible" />
 

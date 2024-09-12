@@ -35,7 +35,6 @@ import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.edit
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -46,7 +45,6 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -63,8 +61,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
@@ -85,8 +81,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var textViewLargeTimeMinutesTwo: TextView
     private lateinit var textViewInfo: TextView
     private lateinit var textViewBattery: TextView
-    private lateinit var textViewWeather: TextView
-    private lateinit var weatherRoot: LinearLayout
     private lateinit var infoRoot: LinearLayout
     private lateinit var textViewAlarm: TextView
     private lateinit var textViewTouchBlock: TextView
@@ -109,8 +103,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var isFullScreenNotificationTriggered = false
     private var shouldTriggerLogin = false
     private var isLoginTriggered = false
-
-    private lateinit var weatherService: WeatherService
 
     private lateinit var googleSignInClient: GoogleSignInClient
     private val resultCodeGoogle = 9001
@@ -391,15 +383,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewLargeTimeMinutesTwo = findViewById(R.id.largeTimeMinutesTwo)
         textViewInfo = findViewById(R.id.info)
         textViewBattery = findViewById(R.id.battery)
-        textViewWeather = findViewById(R.id.weather)
-        textViewWeather.post {
-            findViewById<AppCompatImageView>(R.id.info_icon).apply {
-                layoutParams = layoutParams.apply {
-                    height = textViewWeather.measuredHeight
-                }
-            }
-        }
-        weatherRoot = findViewById(R.id.weather_root)
         infoRoot = findViewById(R.id.info_root)
         textViewAlarm = findViewById(R.id.alarm)
         textViewTouchBlock.setOnTouchListener { v, event ->
@@ -407,7 +390,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         notificationSmall = findViewById(R.id.notificationSmall)
         brightnessRestoreRoot = findViewById(R.id.brightnessRestoreRoot)
-        currentWeather?.let { updateWeatherUI(it, false) }
         currentInfo?.let {
             if (textViewInfo.text == getString(R.string.info) && (Date().time < currentInfoTime)) {
                 textViewInfo.text = it
@@ -479,21 +461,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                         setNotificationInfo()
                         notificationSmall.animateAlpha(200)
                     }
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        weatherService =
-                            Retrofit.Builder().baseUrl("https://api.openweathermap.org/data/2.5/")
-                                .addConverterFactory(GsonConverterFactory.create()).build()
-                                .create(WeatherService::class.java)
-                        CoroutineScope(Dispatchers.IO).launch {
-                            try {
-                                val weatherData = weatherService.getWeather()
-                                withContext(Dispatchers.Main) {
-                                    updateWeatherUI(weatherData)
-                                }
-                            } catch (ignored: Throwable) {
-                            }
-                        }
-                    }, 200)
                 }
             }
         })
@@ -520,20 +487,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         textViewBattery.post {
             toggleClock(sharedPrefs.getBoolean("isBig", false))
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun updateWeatherUI(weatherData: WeatherData, shouldAnimate: Boolean = true) {
-        if (currentWeather == weatherData && textViewWeather.text != getString(R.string.weather)) return
-        currentWeather = weatherData
-        textViewWeather.text = "${weatherData.main.temp.toInt()}°C"
-        val iconUrl =
-            "https://openweathermap.org/img/wn/${weatherData.weather.firstOrNull()?.icon}@2x.png"
-        Glide.with(this).load(iconUrl).into(findViewById(R.id.image_view_weather_icon))
-        weatherRoot.isVisible = true
-        if (shouldAnimate) {
-            weatherRoot.animateAlpha(400)
         }
     }
 
@@ -793,7 +746,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         var currentInfo: String? = null
         var currentInfoTime: Long = 0
-        var currentWeather: WeatherData? = null
 
         var googleSignInAccount: GoogleSignInAccount? = null
 
