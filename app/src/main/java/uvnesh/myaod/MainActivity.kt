@@ -251,10 +251,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             withContext(Dispatchers.Main) {
                 if (event == null) {
                     Log.d("Calendar", "No upcoming events found")
-                    infoRoot.isVisible = false
+                    infoRoot.isVisible = true
                     textViewInfo.text = "No upcoming events today"
                     currentInfo = textViewInfo.text.toString()
                     currentInfoTime = Long.MAX_VALUE
+                    infoRoot.animateAlpha(400)
                     // No Events Today. Fetch Again after next day
                     val checkOnNextDayRunnable = object : Runnable {
                         override fun run() {
