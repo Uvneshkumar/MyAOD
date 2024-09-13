@@ -514,6 +514,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         handler.removeCallbacks(timeRunnable)
         handler.post(timeRunnable)
         rootAnim.alpha = 1f
+        if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
+            currentVolume = getCurrentDeviceVolume(this)
+            if (currentBrightness == -1) currentBrightness = getCurrentBrightness()
+            maxAndNeededVolume =
+                (maxAndNeededVolume * resources.getInteger(R.integer.volume_percentage) / 100.0).toInt()
+            playSound()
+        }
+        executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
         textViewSmallTime.post {
             if (isHome) {
                 isHome = false
@@ -524,19 +532,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     animator.addListener(object : Animator.AnimatorListener {
                         override fun onAnimationStart(animation: Animator) {}
                         override fun onAnimationEnd(animation: Animator) {
-                            if (isFullScreenNotificationTriggered) {
-//                                    toggleTorch.postValue(false)
-                            } else if (isLoginTriggered) {
-                                isLoginTriggered = false
-                            } else {
-                                proximitySensor?.also { sensor ->
-                                    sensorManager.registerListener(
-                                        this@MainActivity, sensor, SensorManager.SENSOR_DELAY_NORMAL
-                                    )
-                                }
-                                enableLight()
-                            }
-                            isFullScreenNotificationTriggered = false
+                            endBlock()
                         }
 
                         override fun onAnimationCancel(animation: Animator) {}
@@ -544,16 +540,26 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     })
                     animator.start()
                 }
+            } else {
+                endBlock()
             }
         }
-        if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
-            currentVolume = getCurrentDeviceVolume(this)
-            if (currentBrightness == -1) currentBrightness = getCurrentBrightness()
-            maxAndNeededVolume =
-                (maxAndNeededVolume * resources.getInteger(R.integer.volume_percentage) / 100.0).toInt()
-            playSound()
+    }
+
+    private fun endBlock() {
+        if (isFullScreenNotificationTriggered) {
+//            toggleTorch.postValue(false)
+        } else if (isLoginTriggered) {
+            isLoginTriggered = false
+        } else {
+            proximitySensor?.also { sensor ->
+                sensorManager.registerListener(
+                    this@MainActivity, sensor, SensorManager.SENSOR_DELAY_NORMAL
+                )
+            }
         }
-        executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
+        isFullScreenNotificationTriggered = false
+        enableLight()
     }
 
     private fun getCurrentBrightness(): Int {
