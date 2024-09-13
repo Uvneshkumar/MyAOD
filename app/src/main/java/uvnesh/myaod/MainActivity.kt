@@ -91,6 +91,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var handler: Handler
     private lateinit var timeRunnable: Runnable
 
+    private lateinit var lightHandler: Handler
+    private lateinit var lightTimeRunnable: Runnable
+
     private val notificationPackages = mutableListOf<String>()
 
     private lateinit var sharedPrefs: SharedPreferences
@@ -421,6 +424,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 handler.postDelayed(this, 1000) // 1 second delay
             }
         }
+        lightHandler = Handler(Looper.getMainLooper())
+        lightTimeRunnable = Runnable {
+            lightSensor?.also { sensor ->
+                sensorManager.registerListener(
+                    this@MainActivity, sensor, SensorManager.SENSOR_DELAY_NORMAL
+                )
+            }
+        }
         if (resources.getBoolean(R.bool.should_unlock_on_tap)) {
             findViewById<View>(R.id.fpView).setOnClickListener {
 //                finishApp()
@@ -477,6 +488,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         brightnessRestoreRoot.setOnClickListener {
             shouldShowRestoreBrightness.postValue(false)
             executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
+            enableLight()
         }
         shouldShowRestoreBrightness.observe(this) {
             brightnessRestoreRoot.isVisible = it
@@ -490,6 +502,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private val topMargin = 100.px.toFloat()
+
+    private fun enableLight() {
+        lightHandler.removeCallbacks(lightTimeRunnable)
+        lightHandler.post(lightTimeRunnable)
+    }
 
     override fun onResume() {
         super.onResume()
@@ -515,13 +532,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                                         this@MainActivity, sensor, SensorManager.SENSOR_DELAY_NORMAL
                                     )
                                 }
-                                lightSensor?.also { sensor ->
-                                    sensorManager.registerListener(
-                                        this@MainActivity,
-                                        sensor,
-                                        5000000 // Microseconds (5 Seconds)
-                                    )
-                                }
+                                enableLight()
                             }
                             isFullScreenNotificationTriggered = false
                         }
@@ -693,6 +704,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     // Add your logic here
                     textViewTouchBlock.isVisible = false
                     enableTouch()
+                    enableLight()
                 }
             } else if (!isFullScreenNotificationTriggered && it.sensor.type == Sensor.TYPE_LIGHT) {
                 val localCurrentBrightness = getCurrentBrightness()
@@ -713,6 +725,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                         }"
                     )
                 }
+                sensorManager.unregisterListener(this, lightSensor)
+                lightHandler.postDelayed(lightTimeRunnable, 5000) // 5 Second Delay
             }
         }
     }
