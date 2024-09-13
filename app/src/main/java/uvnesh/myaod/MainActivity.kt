@@ -155,6 +155,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
         handler.removeCallbacks(timeRunnable)
+        lightHandler.removeCallbacks(lightTimeRunnable)
         sensorManager.unregisterListener(this)
 //        if (!isFinishing) {
 //            finishApp()
