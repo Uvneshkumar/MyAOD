@@ -517,7 +517,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                                 }
                                 lightSensor?.also { sensor ->
                                     sensorManager.registerListener(
-                                        this@MainActivity, sensor, SensorManager.SENSOR_DELAY_NORMAL
+                                        this@MainActivity,
+                                        sensor,
+                                        5000000 // Microseconds (5 Seconds)
                                     )
                                 }
                             }
@@ -677,8 +679,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewLargeTimeMinutesTwo.isVisible = showBigClock
     }
 
-    var canChange = true
-
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
             if (it.sensor.type == Sensor.TYPE_PROXIMITY) {
@@ -694,13 +694,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     textViewTouchBlock.isVisible = false
                     enableTouch()
                 }
-            } else if (canChange && !isFullScreenNotificationTriggered && it.sensor.type == Sensor.TYPE_LIGHT) {
+            } else if (!isFullScreenNotificationTriggered && it.sensor.type == Sensor.TYPE_LIGHT) {
                 val localCurrentBrightness = getCurrentBrightness()
                 if (it.values[0] <= 5 && localCurrentBrightness != resources.getInteger(R.integer.aod_brightness_low) && localCurrentBrightness != currentBrightness && shouldShowRestoreBrightness.value != true) {
-                    canChange = false
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        canChange = true
-                    }, 5000)
                     executeCommand(
                         "su -c settings put system screen_brightness ${
                             resources.getInteger(
@@ -709,10 +705,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                         }"
                     )
                 } else if (it.values[0] > 5 && localCurrentBrightness != resources.getInteger(R.integer.aod_brightness) && localCurrentBrightness != currentBrightness && shouldShowRestoreBrightness.value != true) {
-                    canChange = false
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        canChange = true
-                    }, 5000)
                     executeCommand(
                         "su -c settings put system screen_brightness ${
                             resources.getInteger(
