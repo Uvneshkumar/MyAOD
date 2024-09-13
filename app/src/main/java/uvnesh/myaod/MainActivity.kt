@@ -154,6 +154,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 return
             }
         }
+        handler.removeCallbacks(timeRunnable)
         sensorManager.unregisterListener(this)
 //        if (!isFinishing) {
 //            finishApp()
@@ -461,7 +462,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 true
             }
         }
-        handler.post(timeRunnable)
         executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
         isAppsLoaded.observe(this, object : Observer<Boolean> {
             override fun onChanged(value: Boolean) {
@@ -510,7 +510,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
-        updateDateTime()
+        handler.removeCallbacks(timeRunnable)
+        handler.post(timeRunnable)
         rootAnim.alpha = 1f
         textViewSmallTime.post {
             if (isHome) {
