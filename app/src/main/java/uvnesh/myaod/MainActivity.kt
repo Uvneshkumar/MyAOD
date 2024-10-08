@@ -330,11 +330,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun goHome() {
         playSound(false)
         isHome = true
+        executeCommand("su -c settings put system screen_brightness $currentBrightness", true)
+        executeCommand("su -c input keyevent 3", true)
         rootAnim.alpha = 1f
         rootAnim.isVisible = true
         rootAnim.post {
             findViewById<View>(R.id.main).translationY = topMargin
-            executeCommand("su -c input keyevent 3")
         }
     }
 
@@ -766,7 +767,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         var activeNotifications: MutableLiveData<Array<StatusBarNotification>> =
             MutableLiveData(arrayOf())
 
-        fun executeCommand(command: String): String {
+        // isAsync should always be false to avoid unknown recursive loop
+        fun executeCommand(command: String, isAsync: Boolean = false): String {
+            if (isAsync) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    executeCommand(command)
+                }
+                return ""
+            }
             if (command.contains("service call statusbar 1")) {
                 executeCommand("su -c settings put system screen_brightness $currentBrightness")
                 shouldShowRestoreBrightness.postValue(true)
