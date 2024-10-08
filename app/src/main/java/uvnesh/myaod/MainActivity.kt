@@ -327,19 +327,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private var currentAnimScale = ""
-
     private fun goHome() {
-        executeCommand("su -c settings put global animator_duration_scale 0")
-        CoroutineScope(Dispatchers.IO).launch {
-            executeCommand("su -c settings put system screen_brightness $currentBrightness")
-        }
         playSound(false)
         isHome = true
         rootAnim.alpha = 1f
         rootAnim.isVisible = true
         rootAnim.post {
-            executeCommand("su -c settings put global animator_duration_scale $currentAnimScale")
             findViewById<View>(R.id.main).translationY = topMargin
             executeCommand("su -c input keyevent 3")
         }
@@ -568,7 +561,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         isFullScreenNotificationTriggered = false
         enableLight()
-        currentAnimScale = executeCommand("su -c settings get global animator_duration_scale")
     }
 
     private fun getCurrentBrightness(): Int {
