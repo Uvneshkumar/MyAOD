@@ -504,7 +504,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private val topMargin = 100.px.toFloat()
+    private val topMargin = -100.px.toFloat()
 
     private fun enableLight() {
         lightHandler.removeCallbacks(lightTimeRunnable)
@@ -527,10 +527,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewSmallTime.post {
             if (isHome) {
                 isHome = false
-                rootAnim.animateAlpha(500, true)
+                val animDuration = 500L
+                rootAnim.animateAlpha(animDuration, true)
                 findViewById<View>(R.id.main).apply {
                     val animator = ObjectAnimator.ofFloat(this@apply, "translationY", topMargin, 0f)
-                    animator.duration = 500
+                    animator.duration = animDuration
                     animator.addListener(object : Animator.AnimatorListener {
                         override fun onAnimationStart(animation: Animator) {}
                         override fun onAnimationEnd(animation: Animator) {
