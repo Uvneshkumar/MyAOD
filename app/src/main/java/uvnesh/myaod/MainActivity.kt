@@ -26,6 +26,7 @@ import android.os.Handler
 import android.os.Looper
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -345,6 +346,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         return ringerMode == AudioManager.RINGER_MODE_NORMAL
     }
 
+    private val aodBrightnessLuxOut = TypedValue()
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
@@ -357,6 +360,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
         lockSound = MediaPlayer.create(this, R.raw.lock)
         setContentView(R.layout.activity_main)
+        resources.getValue(R.dimen.aod_brightness_lux, aodBrightnessLuxOut, true)
         findViewById<View>(android.R.id.content).setBackgroundColor(getColor(android.R.color.black))
         lifecycleScope.launch {
             loadAppIcons()
@@ -719,7 +723,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 }
             } else if (!isFullScreenNotificationTriggered && it.sensor.type == Sensor.TYPE_LIGHT) {
                 val localCurrentBrightness = getCurrentBrightness()
-                if (it.values[0] <= 5 && localCurrentBrightness != resources.getInteger(R.integer.aod_brightness_low) && localCurrentBrightness != currentBrightness && shouldShowRestoreBrightness.value != true) {
+                if (it.values[0] <= aodBrightnessLuxOut.float && localCurrentBrightness != resources.getInteger(
+                        R.integer.aod_brightness_low
+                    ) && localCurrentBrightness != currentBrightness && shouldShowRestoreBrightness.value != true
+                ) {
                     executeCommand(
                         "su -c settings put system screen_brightness ${
                             resources.getInteger(
@@ -727,7 +734,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                             )
                         }"
                     )
-                } else if (it.values[0] > 5 && localCurrentBrightness != resources.getInteger(R.integer.aod_brightness) && localCurrentBrightness != currentBrightness && shouldShowRestoreBrightness.value != true) {
+                } else if (it.values[0] > aodBrightnessLuxOut.float && localCurrentBrightness != resources.getInteger(
+                        R.integer.aod_brightness
+                    ) && localCurrentBrightness != currentBrightness && shouldShowRestoreBrightness.value != true
+                ) {
                     executeCommand(
                         "su -c settings put system screen_brightness ${
                             resources.getInteger(

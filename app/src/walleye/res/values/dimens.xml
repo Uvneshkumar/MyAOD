@@ -2,6 +2,7 @@
 <resources>
     <dimen name="large_clock_margin_top">160dp</dimen>
     <integer name="volume_percentage">80</integer>
+    <item name="aod_brightness_lux" format="float" type="dimen">10</item>
     <dimen name="fingerprint_margin_bottom">100dp</dimen>
     <dimen name="battery_margin_bottom">40dp</dimen>
     <dimen name="top_margin">40dp</dimen>
