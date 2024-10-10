@@ -11,6 +11,7 @@ import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Resources.getSystem
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -37,6 +38,7 @@ import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
+import androidx.core.view.ViewCompat.setSystemGestureExclusionRects
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -360,6 +362,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
         lockSound = MediaPlayer.create(this, R.raw.lock)
         setContentView(R.layout.activity_main)
+        val height = getSystem().displayMetrics.heightPixels
+        val width = getSystem().displayMetrics.widthPixels
+        val exclusionRects = listOf(Rect(0, 0, width, height))
+        setSystemGestureExclusionRects(findViewById(R.id.main), exclusionRects)
         resources.getValue(R.dimen.aod_brightness_lux, aodBrightnessLuxOut, true)
         findViewById<View>(android.R.id.content).setBackgroundColor(getColor(android.R.color.black))
         lifecycleScope.launch {
