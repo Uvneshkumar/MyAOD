@@ -5,14 +5,14 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
-import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
 import uvnesh.myaod.MainActivity.Companion.executeCommand
 import uvnesh.myaod.MainActivity.Companion.toggleTorch
 import kotlin.math.abs
 
 class SwipeDetectableView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : View(context, attrs, defStyleAttr) {
+) : ConstraintLayout(context, attrs, defStyleAttr) {
 
     private lateinit var gestureDetector: GestureDetector
 
