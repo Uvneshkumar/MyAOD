@@ -2,6 +2,7 @@ package uvnesh.myaod
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.content.Context
@@ -91,6 +92,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var notificationSmall: LinearLayout
     private lateinit var brightnessRestoreRoot: View
 
+    private val shiftHandler = Handler(Looper.getMainLooper())
     private lateinit var handler: Handler
     private lateinit var timeRunnable: Runnable
 
@@ -512,7 +514,32 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewBattery.post {
             toggleClock(sharedPrefs.getBoolean("isBig", false))
         }
+        startPeriodicShifting()
     }
+
+    private fun startPeriodicShifting() {
+        val shiftInterval = 600000L // 10 Minutes
+        shiftHandler.postDelayed(object : Runnable {
+            override fun run() {
+                shiftContent()
+                shiftHandler.postDelayed(this, shiftInterval)
+            }
+        }, shiftInterval)
+    }
+
+    private fun shiftContent() {
+        val shiftX = (0..10).random()
+        val shiftY = (0..10).random()
+        val animator = ValueAnimator.ofFloat(0f, 1f)
+        animator.duration = 1000L
+        animator.addUpdateListener { animation ->
+            val fraction = animation.animatedFraction
+            findViewById<View>(android.R.id.content).translationX = shiftX * fraction
+            findViewById<View>(android.R.id.content).translationY = shiftY * fraction
+        }
+        animator.start()
+    }
+
 
     private val topMargin = -40.px.toFloat()
 
