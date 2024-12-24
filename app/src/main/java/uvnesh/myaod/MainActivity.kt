@@ -482,7 +482,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     isAppsLoaded.removeObserver(this)
                     activeNotifications.observe(this@MainActivity) {
                         setNotificationInfo()
-                        notificationSmall.animateAlpha(200)
+//                        notificationSmall.animateAlpha(200)
                     }
                 }
             }
@@ -514,7 +514,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private val topMargin = -100.px.toFloat()
+    private val topMargin = -40.px.toFloat()
 
     private fun enableLight() {
         lightHandler.removeCallbacks(lightTimeRunnable)
@@ -538,7 +538,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             if (isHome) {
                 isHome = false
                 val animDuration = 500L
-                rootAnim.animateAlpha(animDuration, true)
+                rootAnim.animateAlpha((animDuration * 1.1).toLong(), true)
                 findViewById<View>(R.id.main).apply {
                     val animator = ObjectAnimator.ofFloat(this@apply, "translationY", topMargin, 0f)
                     animator.duration = animDuration
@@ -651,8 +651,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             notificationSmall.addView(ImageView(this).apply {
                 post {
                     setPadding(0, 5.px, 5.px, 5.px)
-                    layoutParams.height = 36.px
-                    layoutParams.width = 36.px
+                    layoutParams.height = 40.px
+                    layoutParams.width = 40.px
                     requestLayout()
                     setImageDrawable(iconDrawable)
                 }
