@@ -9,235 +9,242 @@
     android:background="@android:color/black"
     tools:context=".MainActivity">
 
-    <View
-        android:id="@+id/topMargin"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/innerLayout"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_margin"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/smallTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="36dp"
-        android:fontFamily="@font/googlesansclock"
-        android:gravity="center_vertical"
-        android:includeFontPadding="false"
-        android:paddingBottom="10dp"
-        android:textColor="@android:color/white"
-        android:textSize="94sp"
-        android:visibility="gone"
-        app:fontVariationSettings="'wght' 100"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/topMargin" />
-
-    <TextView
-        android:id="@+id/date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:gravity="center_vertical"
-        android:includeFontPadding="false"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/smallTime"
-        tools:text="Fri, 12 Jul" />
-
-    <LinearLayout
-        android:id="@+id/info_root"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="40dp"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/date">
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/info_icon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            app:srcCompat="@drawable/ic_calendar_today" />
+        <View
+            android:id="@+id/topMargin"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/top_margin"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/info"
+            android:id="@+id/smallTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="8dp"
-            android:ellipsize="middle"
+            android:layout_marginStart="36dp"
+            android:fontFamily="@font/googlesansclock"
+            android:gravity="center_vertical"
             android:includeFontPadding="false"
-            android:maxLines="1"
-            android:text="@string/info"
+            android:paddingBottom="10dp"
+            android:textColor="@android:color/white"
+            android:textSize="94sp"
+            android:visibility="gone"
+            app:fontVariationSettings="'wght' 100"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/topMargin" />
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:gravity="center_vertical"
+            android:includeFontPadding="false"
             android:textColor="@android:color/white"
             android:textSize="18sp"
-            tools:ignore="HardcodedText" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/smallTime"
+            tools:text="Fri, 12 Jul" />
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/info_root"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="40dp"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/date">
 
-    <TextView
-        android:id="@+id/alarm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="10dp"
-        android:drawablePadding="8dp"
-        android:gravity="center_vertical"
-        android:includeFontPadding="false"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:visibility="gone"
-        app:drawableStartCompat="@drawable/ic_alarm"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/info_root"
-        tools:text="Alarm"
-        tools:visibility="visible" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/info_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                app:srcCompat="@drawable/ic_calendar_today" />
 
-    <LinearLayout
-        android:id="@+id/largeTimeHoursRoot"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/large_clock_margin_top"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+            <TextView
+                android:id="@+id/info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="8dp"
+                android:ellipsize="middle"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:text="@string/info"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                tools:ignore="HardcodedText" />
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/largeTimeHoursOne"
+            android:id="@+id/alarm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/googlesansclock"
-            android:gravity="center"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="10dp"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
             android:includeFontPadding="false"
-            android:minWidth="112dp"
             android:textColor="@android:color/white"
-            android:textSize="180sp"
-            app:fontVariationSettings="'wght' 100"
-            tools:text="0" />
+            android:textSize="18sp"
+            android:visibility="gone"
+            app:drawableStartCompat="@drawable/ic_alarm"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/info_root"
+            tools:text="Alarm"
+            tools:visibility="visible" />
+
+        <LinearLayout
+            android:id="@+id/largeTimeHoursRoot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/large_clock_margin_top"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/largeTimeHoursOne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/googlesansclock"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:minWidth="112dp"
+                android:textColor="@android:color/white"
+                android:textSize="180sp"
+                app:fontVariationSettings="'wght' 100"
+                tools:text="0" />
+
+            <TextView
+                android:id="@+id/largeTimeHoursTwo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-10dp"
+                android:fontFamily="@font/googlesansclock"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:minWidth="112dp"
+                android:textColor="@android:color/white"
+                android:textSize="180sp"
+                app:fontVariationSettings="'wght' 100"
+                tools:text="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/largeTimeMinutesRoot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-60dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/largeTimeHoursRoot">
+
+            <TextView
+                android:id="@+id/largeTimeMinutesOne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/googlesansclock"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:minWidth="112dp"
+                android:textColor="@android:color/white"
+                android:textSize="180sp"
+                app:fontVariationSettings="'wght' 100"
+                tools:text="0" />
+
+            <TextView
+                android:id="@+id/largeTimeMinutesTwo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-10dp"
+                android:fontFamily="@font/googlesansclock"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:minWidth="112dp"
+                android:textColor="@android:color/white"
+                android:textSize="180sp"
+                app:fontVariationSettings="'wght' 100"
+                tools:text="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/notificationSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/notification_small_margin_bottom"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            android:paddingStart="25dp"
+            app:layout_constraintBottom_toTopOf="@id/battery"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:ignore="RtlSymmetry" />
 
         <TextView
-            android:id="@+id/largeTimeHoursTwo"
+            android:id="@+id/battery"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="-10dp"
-            android:fontFamily="@font/googlesansclock"
+            android:layout_marginBottom="@dimen/battery_margin_bottom"
+            android:fontFamily="@font/roboto_light"
             android:gravity="center"
             android:includeFontPadding="false"
-            android:minWidth="112dp"
             android:textColor="@android:color/white"
-            android:textSize="180sp"
-            app:fontVariationSettings="'wght' 100"
-            tools:text="1" />
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="100" />
 
-    </LinearLayout>
+        <View
+            android:id="@+id/fpView"
+            android:layout_width="84dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="@dimen/fingerprint_margin_bottom"
+            android:background="@drawable/circle"
+            android:padding="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/largeTimeMinutesRoot"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="-60dp"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/largeTimeHoursRoot">
+        <View
+            android:id="@+id/brightnessRestoreRoot"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/rootAnim"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:visibility="gone" />
 
         <TextView
-            android:id="@+id/largeTimeMinutesOne"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/googlesansclock"
+            android:id="@+id/touchBlock"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black"
             android:gravity="center"
-            android:includeFontPadding="false"
-            android:minWidth="112dp"
             android:textColor="@android:color/white"
-            android:textSize="180sp"
-            app:fontVariationSettings="'wght' 100"
-            tools:text="0" />
+            android:textSize="20sp"
+            android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/largeTimeMinutesTwo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="-10dp"
-            android:fontFamily="@font/googlesansclock"
-            android:gravity="center"
-            android:includeFontPadding="false"
-            android:minWidth="112dp"
-            android:textColor="@android:color/white"
-            android:textSize="180sp"
-            app:fontVariationSettings="'wght' 100"
-            tools:text="1" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/notificationSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/notification_small_margin_bottom"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="20dp"
-        android:paddingStart="25dp"
-        app:layout_constraintBottom_toTopOf="@id/battery"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="RtlSymmetry" />
-
-    <TextView
-        android:id="@+id/battery"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/battery_margin_bottom"
-        android:fontFamily="@font/roboto_light"
-        android:gravity="center"
-        android:includeFontPadding="false"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:text="100" />
-
-    <View
-        android:id="@+id/fpView"
-        android:layout_width="84dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="@dimen/fingerprint_margin_bottom"
-        android:background="@drawable/circle"
-        android:padding="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <View
-        android:id="@+id/brightnessRestoreRoot"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
-
-    <View
-        android:id="@+id/rootAnim"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/black"
-        android:gravity="center"
-        android:textColor="@android:color/white"
-        android:textSize="20sp"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/touchBlock"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/black"
-        android:gravity="center"
-        android:textColor="@android:color/white"
-        android:textSize="20sp"
-        android:visibility="gone" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </uvnesh.myaod.SwipeDetectableView>

@@ -77,6 +77,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var lockSound: MediaPlayer
     private lateinit var unlockSound: MediaPlayer
 
+    private lateinit var innerLayout: View
     private lateinit var textViewDate: TextView
     private lateinit var textViewSmallTime: TextView
     private lateinit var textViewLargeTimeHoursOne: TextView
@@ -393,6 +394,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             setDeviceVolume(currentVolume, this)
         }
         sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        innerLayout = findViewById(R.id.innerLayout)
         textViewDate = findViewById(R.id.date)
         textViewSmallTime = findViewById(R.id.smallTime)
         textViewLargeTimeHoursOne = findViewById(R.id.largeTimeHoursOne)
@@ -534,8 +536,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         animator.duration = 1000L
         animator.addUpdateListener { animation ->
             val fraction = animation.animatedFraction
-            findViewById<View>(android.R.id.content).translationX = shiftX * fraction
-            findViewById<View>(android.R.id.content).translationY = shiftY * fraction
+            innerLayout.translationX = shiftX * fraction
+            innerLayout.translationY = shiftY * fraction
         }
         animator.start()
     }
