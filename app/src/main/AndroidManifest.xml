@@ -42,6 +42,7 @@
             android:configChanges="colorMode|density|fontScale|fontWeightAdjustment|grammaticalGender|keyboard|keyboardHidden|layoutDirection|locale|mcc|mnc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|touchscreen|uiMode"
             android:exported="true"
             android:screenOrientation="portrait"
+            android:showOnLockScreen="false"
             tools:ignore="DiscouragedApi, LockedOrientationActivity" />
 
         <provider

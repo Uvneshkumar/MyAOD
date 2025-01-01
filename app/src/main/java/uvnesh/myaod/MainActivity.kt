@@ -362,6 +362,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (!resources.getBoolean(R.bool.should_lock_screen)) {
             enableEdgeToEdge()
         }
+        setShowWhenLocked(false)
         super.onCreate(savedInstanceState)
         lockSound = MediaPlayer.create(this, R.raw.lock)
         setContentView(R.layout.activity_main)
