@@ -17,15 +17,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    signingConfigs {
-        getByName("debug") {
-            keyAlias = "Uvnesh"
-            keyPassword = "android"
-            storePassword = "android"
-            storeFile = File("C:\\Users\\Uvnesh\\Desktop\\Work\\Uvnesh.jks")
-        }
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -33,10 +24,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
-        }
-        debug {
-            signingConfig = signingConfigs.getByName("debug")
         }
         create("lemonadep") {
             initWith(getByName("release"))
