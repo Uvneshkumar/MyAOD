@@ -3,4 +3,5 @@
     <dimen name="notification_small_margin_bottom">145dp</dimen>
     <integer name="aod_brightness">17</integer>
     <integer name="aod_brightness_low">1</integer>
+    <dimen name="layout_margin">40dp</dimen>
 </resources>
