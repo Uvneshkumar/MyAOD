@@ -18,8 +18,6 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.hardware.camera2.CameraAccessException
-import android.hardware.camera2.CameraManager
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.BatteryManager
@@ -465,17 +463,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 }
             }
         })
-        toggleTorch.observe(this) {
-            if (resources.getBoolean(R.bool.should_use_torch)) {
-                val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
-                val cameraId = cameraManager.cameraIdList.firstOrNull() ?: return@observe
-                try {
-                    cameraManager.setTorchMode(cameraId, it)
-                } catch (e: CameraAccessException) {
-                    e.printStackTrace()
-                }
-            }
-        }
         notificationSmall.setOnClickListener {
             executeCommand("su -c service call statusbar 1")
         }
@@ -548,15 +535,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun endBlock() {
-        if (isFullScreenNotificationTriggered) {
-//            toggleTorch.postValue(false)
-        } else if (isLoginTriggered) {
-            isLoginTriggered = false
-        } else {
-            proximitySensor?.also { sensor ->
-                sensorManager.registerListener(
-                    this@MainActivity, sensor, SensorManager.SENSOR_DELAY_NORMAL
-                )
+        if (!isFullScreenNotificationTriggered) {
+            if (isLoginTriggered) {
+                isLoginTriggered = false
+            } else {
+                proximitySensor?.also { sensor ->
+                    sensorManager.registerListener(
+                        this@MainActivity, sensor, SensorManager.SENSOR_DELAY_NORMAL
+                    )
+                }
             }
         }
         isFullScreenNotificationTriggered = false
@@ -603,7 +590,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             if (notification.notification?.fullScreenIntent != null && notification.notification.channelId == "Firing" && notification.packageName == "com.google.android.deskclock" && notification.notification.actions?.size == 2) {
                 isFullScreenNotificationTriggered = true
                 Handler(Looper.getMainLooper()).postDelayed({
-//                    toggleTorch.postValue(true)
                     executeCommand("su -c input tap 400 200")
                 }, 1000)
                 continue
@@ -717,7 +703,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         var maxAndNeededVolume: Int = 0
         var currentVolume = 0
-        val toggleTorch = MutableLiveData(false)
 
         var currentInfo: String? = null
         var currentInfoTime: Long = 0

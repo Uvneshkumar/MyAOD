@@ -4,7 +4,6 @@
     <bool name="should_unlock_on_tap">true</bool>
     <bool name="should_use_proximity">true</bool>
     <bool name="should_animate_layout_changes">false</bool>
-    <bool name="should_use_torch">true</bool>
     <bool name="should_minimise">true</bool>
     <bool name="should_allow_clock_switching">true</bool>
     <bool name="should_use_volume">true</bool>
