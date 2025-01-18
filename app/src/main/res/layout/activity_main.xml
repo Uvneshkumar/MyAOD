@@ -220,10 +220,10 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <View
-            android:id="@+id/brightnessRestoreRoot"
+            android:id="@+id/brightnessRoot"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone" />
+            android:background="#A6000000" />
 
         <View
             android:id="@+id/rootAnim"

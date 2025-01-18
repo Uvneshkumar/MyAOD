@@ -28,7 +28,6 @@ import android.os.Handler
 import android.os.Looper
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -91,14 +90,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var textViewTouchBlock: TextView
     private lateinit var rootAnim: View
     private lateinit var notificationSmall: LinearLayout
-    private lateinit var brightnessRestoreRoot: View
 
     private val shiftHandler = Handler(Looper.getMainLooper())
     private lateinit var handler: Handler
     private lateinit var timeRunnable: Runnable
-
-    private lateinit var lightHandler: Handler
-    private lateinit var lightTimeRunnable: Runnable
 
     private val notificationPackages = mutableListOf<String>()
 
@@ -107,7 +102,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
     private var proximitySensor: Sensor? = null
-    private var lightSensor: Sensor? = null
 
     private var isFullScreenNotificationTriggered = false
     private var shouldTriggerLogin = false
@@ -127,8 +121,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             playSound(false)
         }
         Handler(Looper.getMainLooper()).postDelayed({
-            executeCommand("su -c settings put system screen_brightness $currentBrightness")
-            currentBrightness = -1
             if (!shouldMinimise) {
                 finishAndRemoveTask()
             }
@@ -161,7 +153,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
         handler.removeCallbacks(timeRunnable)
-        lightHandler.removeCallbacks(lightTimeRunnable)
         sensorManager.unregisterListener(this)
 //        if (!isFinishing) {
 //            finishApp()
@@ -336,7 +327,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun goHome() {
         playSound(false)
         isHome = true
-        executeCommand("su -c settings put system screen_brightness $currentBrightness", true)
         executeCommand("su -c input keyevent 3", true)
         rootAnim.alpha = 1f
         rootAnim.isVisible = true
@@ -350,8 +340,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val ringerMode = audioManager.ringerMode
         return ringerMode == AudioManager.RINGER_MODE_NORMAL
     }
-
-    private val aodBrightnessLuxOut = TypedValue()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -370,7 +358,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val width = getSystem().displayMetrics.widthPixels
         val exclusionRects = listOf(Rect(0, 0, width, height))
         setSystemGestureExclusionRects(findViewById(R.id.main), exclusionRects)
-        resources.getValue(R.dimen.aod_brightness_lux, aodBrightnessLuxOut, true)
         findViewById<View>(android.R.id.content).setBackgroundColor(getColor(android.R.color.black))
         lifecycleScope.launch {
             loadAppIcons()
@@ -385,7 +372,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             return
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        currentBrightness = getCurrentBrightness()
         unlockSound = MediaPlayer.create(this, R.raw.unlock)
         onBackPressedDispatcher.addCallback {}
         lockSound.setOnCompletionListener {
@@ -410,7 +396,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             true
         }
         notificationSmall = findViewById(R.id.notificationSmall)
-        brightnessRestoreRoot = findViewById(R.id.brightnessRestoreRoot)
         currentInfo?.let {
             if (textViewInfo.text == getString(R.string.info) && (Date().time < currentInfoTime)) {
                 textViewInfo.text = it
@@ -433,22 +418,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (resources.getBoolean(R.bool.should_use_proximity)) {
             proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
         }
-        if (resources.getBoolean(R.bool.should_use_light)) {
-            lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
-        }
         handler = Handler(Looper.getMainLooper())
         timeRunnable = object : Runnable {
             override fun run() {
                 updateDateTime()
                 handler.postDelayed(this, 1000) // 1 second delay
-            }
-        }
-        lightHandler = Handler(Looper.getMainLooper())
-        lightTimeRunnable = Runnable {
-            lightSensor?.also { sensor ->
-                sensorManager.registerListener(
-                    this@MainActivity, sensor, SensorManager.SENSOR_DELAY_NORMAL
-                )
             }
         }
         if (resources.getBoolean(R.bool.should_unlock_on_tap)) {
@@ -480,7 +454,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 true
             }
         }
-        executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
         isAppsLoaded.observe(this, object : Observer<Boolean> {
             override fun onChanged(value: Boolean) {
                 if (value) {
@@ -502,14 +475,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     e.printStackTrace()
                 }
             }
-        }
-        brightnessRestoreRoot.setOnClickListener {
-            shouldShowRestoreBrightness.postValue(false)
-            executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
-            enableLight()
-        }
-        shouldShowRestoreBrightness.observe(this) {
-            brightnessRestoreRoot.isVisible = it
         }
         notificationSmall.setOnClickListener {
             executeCommand("su -c service call statusbar 1")
@@ -546,11 +511,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private val topMargin = -40.px.toFloat()
 
-    private fun enableLight() {
-        lightHandler.removeCallbacks(lightTimeRunnable)
-        lightHandler.post(lightTimeRunnable)
-    }
-
     override fun onResume() {
         super.onResume()
         handler.removeCallbacks(timeRunnable)
@@ -558,12 +518,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         rootAnim.alpha = 1f
         if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
             currentVolume = getCurrentDeviceVolume(this)
-            if (currentBrightness == -1) currentBrightness = getCurrentBrightness()
             maxAndNeededVolume =
                 (maxAndNeededVolume * resources.getInteger(R.integer.volume_percentage) / 100.0).toInt()
             playSound()
         }
-        executeCommand("su -c settings put system screen_brightness ${resources.getInteger(R.integer.aod_brightness)}")
         textViewSmallTime.post {
             if (isHome) {
                 isHome = false
@@ -602,19 +560,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
         isFullScreenNotificationTriggered = false
-        enableLight()
-    }
-
-    private fun getCurrentBrightness(): Int {
-        val command = "su -c settings get system screen_brightness"
-        val result = executeCommand(command)
-        // Parse the result to extract the brightness value
-        return try {
-            result.toInt()
-        } catch (e: NumberFormatException) {
-            e.printStackTrace()
-            -1 // Handle parsing error
-        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -656,9 +601,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         // Loop through the notifications
         for (notification in activeNotifications.value.orEmpty()) {
             if (notification.notification?.fullScreenIntent != null && notification.notification.channelId == "Firing" && notification.packageName == "com.google.android.deskclock" && notification.notification.actions?.size == 2) {
-                // Max Brightness to make Alarm more "disturbing"
                 isFullScreenNotificationTriggered = true
-                executeCommand("su -c settings put system screen_brightness 255")
                 Handler(Looper.getMainLooper()).postDelayed({
 //                    toggleTorch.postValue(true)
                     executeCommand("su -c input tap 400 200")
@@ -755,35 +698,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     // Add your logic here
                     textViewTouchBlock.isVisible = false
                     enableTouch()
-                    enableLight()
                 }
-            } else if (!isFullScreenNotificationTriggered && it.sensor.type == Sensor.TYPE_LIGHT) {
-                val localCurrentBrightness = getCurrentBrightness()
-                if (it.values[0] <= aodBrightnessLuxOut.float && localCurrentBrightness != resources.getInteger(
-                        R.integer.aod_brightness_low
-                    ) && localCurrentBrightness != currentBrightness && shouldShowRestoreBrightness.value != true
-                ) {
-                    executeCommand(
-                        "su -c settings put system screen_brightness ${
-                            resources.getInteger(
-                                R.integer.aod_brightness_low
-                            )
-                        }"
-                    )
-                } else if (it.values[0] > aodBrightnessLuxOut.float && localCurrentBrightness != resources.getInteger(
-                        R.integer.aod_brightness
-                    ) && localCurrentBrightness != currentBrightness && shouldShowRestoreBrightness.value != true
-                ) {
-                    executeCommand(
-                        "su -c settings put system screen_brightness ${
-                            resources.getInteger(
-                                R.integer.aod_brightness
-                            )
-                        }"
-                    )
-                }
-                sensorManager.unregisterListener(this, lightSensor)
-                lightHandler.postDelayed(lightTimeRunnable, 5000) // 5 Second Delay
             }
         }
     }
@@ -803,8 +718,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         var maxAndNeededVolume: Int = 0
         var currentVolume = 0
         val toggleTorch = MutableLiveData(false)
-        val shouldShowRestoreBrightness = MutableLiveData(false)
-        var currentBrightness = -1
 
         var currentInfo: String? = null
         var currentInfoTime: Long = 0
@@ -821,10 +734,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     executeCommand(command)
                 }
                 return ""
-            }
-            if (command.contains("service call statusbar 1")) {
-                executeCommand("su -c settings put system screen_brightness $currentBrightness")
-                shouldShowRestoreBrightness.postValue(true)
             }
             try {
                 val process = Runtime.getRuntime().exec(command)
