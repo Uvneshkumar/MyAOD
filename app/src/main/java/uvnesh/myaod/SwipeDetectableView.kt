@@ -5,18 +5,23 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
-import androidx.constraintlayout.widget.ConstraintLayout
+import android.view.View
 import uvnesh.myaod.MainActivity.Companion.executeCommand
 import kotlin.math.abs
 
 class SwipeDetectableView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+) : View(context, attrs, defStyleAttr) {
 
     private lateinit var gestureDetector: GestureDetector
+    private var onLongPress = {}
 
     init {
         setupGestureDetection()
+    }
+
+    fun setOnLongPressCallback(longPressCallback: () -> Unit) {
+        onLongPress = longPressCallback
     }
 
     private fun setupGestureDetection() {
@@ -47,6 +52,11 @@ class SwipeDetectableView @JvmOverloads constructor(
                         return true
                     }
                     return false
+                }
+
+                override fun onLongPress(e: MotionEvent) {
+                    super.onLongPress(e)
+                    onLongPress()
                 }
             })
     }

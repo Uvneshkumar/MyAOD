@@ -27,7 +27,6 @@ import android.os.Looper
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -40,7 +39,6 @@ import androidx.core.view.ViewCompat.setSystemGestureExclusionRects
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.core.view.forEach
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
@@ -74,6 +72,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var lockSound: MediaPlayer
     private lateinit var unlockSound: MediaPlayer
 
+    private lateinit var swipeDetectableView: SwipeDetectableView
     private lateinit var innerLayout: View
     private lateinit var textViewDate: TextView
     private lateinit var textViewSmallTime: TextView
@@ -360,6 +359,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         lifecycleScope.launch {
             loadAppIcons()
         }
+        swipeDetectableView = findViewById(R.id.swipeDetectableView)
         textViewTouchBlock = findViewById(R.id.touchBlock)
         rootAnim = findViewById(R.id.rootAnim)
         if (resources.getBoolean(R.bool.should_lock_screen)) {
@@ -436,20 +436,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
         if (resources.getBoolean(R.bool.should_allow_clock_switching)) {
-            listOf(
-                findViewById<ViewGroup>(R.id.largeTimeHoursRoot),
-                findViewById<ViewGroup>(R.id.largeTimeMinutesRoot)
-            ).forEach {
-                it.forEach {
-                    it.setOnLongClickListener {
-                        toggleClock(false)
-                        true
-                    }
-                }
-            }
-            textViewSmallTime.setOnLongClickListener {
-                toggleClock(true)
-                true
+            swipeDetectableView.setOnLongPressCallback {
+                toggleClock(!sharedPrefs.getBoolean("isBig", false))
             }
         }
         isAppsLoaded.observe(this, object : Observer<Boolean> {
