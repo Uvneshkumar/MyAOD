@@ -44,7 +44,7 @@ class SwipeDetectableView @JvmOverloads constructor(
                     ) {
                         if (deltaY > 0) {
                             // Swipe down
-                            onSwipeDown()
+                            onSwipeDown(e2.x)
                         } else {
                             // Swipe up
                             onSwipeUp()
@@ -70,9 +70,13 @@ class SwipeDetectableView @JvmOverloads constructor(
         // Handle swipe up action
     }
 
-    private fun onSwipeDown() {
-        // Handle swipe down action
-        executeCommand("su -c service call statusbar 1")
+    private fun onSwipeDown(x: Float) {
+        val totalWidth = measuredWidth
+        if (x >= 0.80 * totalWidth) {
+            executeCommand("su -c cmd statusbar expand-settings")
+        } else {
+            executeCommand("su -c cmd statusbar expand-notifications")
+        }
     }
 
     companion object {
