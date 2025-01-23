@@ -465,9 +465,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 }
             }
         })
-        notificationSmall.setOnClickListener {
-            executeCommand("su -c cmd statusbar expand-notifications")
-        }
         textViewBattery.post {
             toggleClock(sharedPrefs.getBoolean("isBig", false))
         }
