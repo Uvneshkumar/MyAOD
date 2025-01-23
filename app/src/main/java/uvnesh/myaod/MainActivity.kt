@@ -5,6 +5,8 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -19,7 +21,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.media.AudioManager
-import android.media.MediaPlayer
+import android.media.RingtoneManager
 import android.os.BatteryManager
 import android.os.Bundle
 import android.os.Handler
@@ -68,9 +70,6 @@ import java.util.Date
 import java.util.Locale
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
-
-    private lateinit var lockSound: MediaPlayer
-    private lateinit var unlockSound: MediaPlayer
 
     private lateinit var swipeDetectableView: SwipeDetectableView
     private lateinit var innerLayout: View
@@ -310,13 +309,32 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private var isHome = false
 
+    private fun createNotificationChannel() {
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        val lockChannel = NotificationChannel(
+            LOCK_CHANNEL, "Lock Channel", NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = name.toString()
+        }
+        val unlockChannel = NotificationChannel(
+            UNLOCK_CHANNEL, "Unlock Channel", NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = name.toString()
+        }
+        notificationManager.createNotificationChannel(lockChannel)
+        notificationManager.createNotificationChannel(unlockChannel)
+    }
+
     private fun playSound(isLock: Boolean = true) {
         if (resources.getBoolean(R.bool.should_use_volume) && isRingerModeNormal()) {
-            if (isLock) {
-                lockSound.start()
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+            val channel = if (isLock) {
+                notificationManager?.getNotificationChannel(LOCK_CHANNEL)
             } else {
-                unlockSound.start()
+                notificationManager?.getNotificationChannel(UNLOCK_CHANNEL)
             }
+            RingtoneManager.getRingtone(applicationContext, channel?.sound).play()
         }
     }
 
@@ -348,8 +366,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         setShowWhenLocked(false)
         super.onCreate(savedInstanceState)
-        lockSound = MediaPlayer.create(this, R.raw.lock)
         setContentView(R.layout.activity_main)
+        createNotificationChannel()
         val height = getSystem().displayMetrics.heightPixels
         val width = getSystem().displayMetrics.widthPixels
         val exclusionRects = listOf(Rect(0, 0, width, height))
@@ -369,7 +387,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             return
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        unlockSound = MediaPlayer.create(this, R.raw.unlock)
         onBackPressedDispatcher.addCallback {}
         sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         innerLayout = findViewById(R.id.innerLayout)
@@ -669,15 +686,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
-    override fun onDestroy() {
-        lockSound.release()
-        unlockSound.release()
-        super.onDestroy()
-//        Don't kill as it delays Notifications when app is launched again
-//        executeCommand("su -c killall $packageName")
-    }
-
     companion object {
+
+        private const val LOCK_CHANNEL = "LOCK_CHANNEL"
+        private const val UNLOCK_CHANNEL = "UNLOCK_CHANNEL"
 
         var currentInfo: String? = null
         var currentInfoTime: Long = 0
