@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="large_clock_margin_top">240dp</dimen>
-    <integer name="volume_percentage">70</integer>
     <dimen name="fingerprint_margin_bottom">200dp</dimen>
     <dimen name="battery_margin_bottom">140dp</dimen>
     <dimen name="top_margin">100dp</dimen>

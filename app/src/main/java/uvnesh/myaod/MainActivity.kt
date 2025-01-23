@@ -312,7 +312,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private fun playSound(isLock: Boolean = true) {
         if (resources.getBoolean(R.bool.should_use_volume) && isRingerModeNormal()) {
-            setDeviceVolume(maxAndNeededVolume, this)
             if (isLock) {
                 lockSound.start()
             } else {
@@ -372,12 +371,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         unlockSound = MediaPlayer.create(this, R.raw.unlock)
         onBackPressedDispatcher.addCallback {}
-        lockSound.setOnCompletionListener {
-            setDeviceVolume(currentVolume, this)
-        }
-        unlockSound.setOnCompletionListener {
-            setDeviceVolume(currentVolume, this)
-        }
         sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         innerLayout = findViewById(R.id.innerLayout)
         textViewDate = findViewById(R.id.date)
@@ -492,9 +485,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         handler.post(timeRunnable)
         rootAnim.alpha = 1f
         if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
-            currentVolume = getCurrentDeviceVolume(this)
-            maxAndNeededVolume =
-                (maxAndNeededVolume * resources.getInteger(R.integer.volume_percentage) / 100.0).toInt()
             playSound()
         }
         textViewSmallTime.post {
@@ -689,9 +679,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     companion object {
 
-        var maxAndNeededVolume: Int = 0
-        var currentVolume = 0
-
         var currentInfo: String? = null
         var currentInfoTime: Long = 0
 
@@ -728,19 +715,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             } catch (ignored: Exception) {
                 return ShizukuShell(arrayListOf(), command.substringAfter("su -c ")).exec()
             }
-        }
-
-        fun setDeviceVolume(volumeLevel: Int, applicationContext: Context) {
-            val audioManager =
-                applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-            audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, volumeLevel, 0)
-        }
-
-        fun getCurrentDeviceVolume(applicationContext: Context): Int {
-            val audioManager =
-                applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-            maxAndNeededVolume = audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC) ?: 0
-            return audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC) ?: -1
         }
     }
 
