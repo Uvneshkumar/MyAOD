@@ -24,7 +24,7 @@
             android:id="@+id/smallTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="36dp"
+            android:layout_marginStart="@dimen/small_clock_margin"
             android:fontFamily="@font/googlesansclock"
             android:gravity="center_vertical"
             android:includeFontPadding="false"

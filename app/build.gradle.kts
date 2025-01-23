@@ -28,6 +28,9 @@ android {
         create("lemonadep") {
             initWith(getByName("release"))
         }
+        create("s20") {
+            initWith(getByName("release"))
+        }
         create("walleye") {
             initWith(getByName("release"))
         }

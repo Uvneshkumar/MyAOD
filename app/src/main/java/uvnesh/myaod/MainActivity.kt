@@ -390,6 +390,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         onBackPressedDispatcher.addCallback {}
         sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         innerLayout = findViewById(R.id.innerLayout)
+        val scaleFactor = resources.getFloat(R.dimen.ui_scale)
+        innerLayout.scaleX = scaleFactor
+        innerLayout.scaleY = scaleFactor
         textViewDate = findViewById(R.id.date)
         textViewSmallTime = findViewById(R.id.smallTime)
         textViewLargeTimeHoursOne = findViewById(R.id.largeTimeHoursOne)
