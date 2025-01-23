@@ -510,7 +510,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewSmallTime.post {
             if (isHome) {
                 isHome = false
-                val animDuration = 500L
+                val animDuration = 600L
                 rootAnim.animateAlpha((animDuration * 1.1).toLong(), true)
                 findViewById<View>(R.id.main).apply {
                     val animator = ObjectAnimator.ofFloat(this@apply, "translationY", topMargin, 0f)
