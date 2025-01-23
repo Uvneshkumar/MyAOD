@@ -62,6 +62,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uvnesh.myaod.LockWidget.isFromWidget
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
@@ -345,7 +346,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         rootAnim.alpha = 1f
         rootAnim.isVisible = true
         rootAnim.post {
-            findViewById<View>(R.id.main).translationY = topMargin
+            findViewById<View>(R.id.main).translationY = topMargin()
         }
     }
 
@@ -496,8 +497,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         animator.start()
     }
 
-
-    private val topMargin = -40.px.toFloat()
+    private fun topMargin(): Float {
+        return if (intent.getBooleanExtra(
+                isFromWidget, false
+            )
+        ) 80.px.toFloat() else -40.px.toFloat()
+    }
 
     override fun onResume() {
         super.onResume()
@@ -513,7 +518,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 val animDuration = 600L
                 rootAnim.animateAlpha((animDuration * 1.1).toLong(), true)
                 findViewById<View>(R.id.main).apply {
-                    val animator = ObjectAnimator.ofFloat(this@apply, "translationY", topMargin, 0f)
+                    val animator =
+                        ObjectAnimator.ofFloat(this@apply, "translationY", topMargin(), 0f)
                     animator.duration = animDuration
                     animator.addListener(object : Animator.AnimatorListener {
                         override fun onAnimationStart(animation: Animator) {}
