@@ -228,7 +228,8 @@
             android:id="@+id/brightnessRoot"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#A6000000" />
+            android:alpha="0.45"
+            android:background="#000000" />
 
         <View
             android:id="@+id/rootAnim"
