@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "uvnesh.myaod"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "uvnesh.myaod"
         minSdk = 30
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 2
         versionName = "1.0"
 
