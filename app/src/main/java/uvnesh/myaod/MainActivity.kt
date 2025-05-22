@@ -597,7 +597,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
             // Extract information from each notification
             val packageName = notification.packageName
-            if (notificationPackages.contains(packageName) || notification.notification.visibility == -1) {
+            if (notificationPackages.contains(packageName) || notification.notification.visibility == -1 || (packageName == "com.android.systemui" && notification.notification.channelId == "CHR")) {
                 notificationPackages.add(packageName)
                 continue
             }
