@@ -3,6 +3,6 @@
     <bool name="should_use_proximity">true</bool>
     <bool name="should_animate_layout_changes">false</bool>
     <bool name="should_allow_clock_switching">true</bool>
-    <bool name="should_use_lock_volume">false</bool>
+    <bool name="should_use_lock_volume">true</bool>
     <bool name="should_use_unlock_volume">true</bool>
 </resources>

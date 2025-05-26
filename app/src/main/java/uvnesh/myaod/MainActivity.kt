@@ -329,7 +329,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                         notificationManager?.getNotificationChannel(LOCK_CHANNEL)?.sound
                     )
                 }
-                lockRingtone?.play()
+                if (lockRingtone?.getTitle(this).orEmpty().trim().lowercase() != "empty_audio") {
+                    lockRingtone?.play()
+                }
             }
         } else {
             if (resources.getBoolean(R.bool.should_use_unlock_volume) && isRingerModeNormal()) {
@@ -339,7 +341,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                         notificationManager?.getNotificationChannel(UNLOCK_CHANNEL)?.sound
                     )
                 }
-                unlockRingtone?.play()
+                if (unlockRingtone?.getTitle(this).orEmpty().trim().lowercase() != "empty_audio") {
+                    unlockRingtone?.play()
+                }
             }
         }
     }
