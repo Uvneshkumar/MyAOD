@@ -143,12 +143,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (isFullScreenNotificationTriggered || isLoginTriggered) {
             return
         }
-        if (resources.getBoolean(R.bool.should_lock_screen)) {
-            if (!isFinishing) {
-                finishAndRemoveTask()
-                return
-            }
-        }
         handler.removeCallbacks(timeRunnable)
         sensorManager.unregisterListener(this)
 //        if (!isFinishing) {
@@ -362,9 +356,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         windowInsetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-        if (!resources.getBoolean(R.bool.should_lock_screen)) {
-            enableEdgeToEdge()
-        }
+        enableEdgeToEdge()
         setShowWhenLocked(false)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -380,13 +372,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         swipeDetectableView = findViewById(R.id.swipeDetectableView)
         textViewTouchBlock = findViewById(R.id.touchBlock)
         rootAnim = findViewById(R.id.rootAnim)
-        if (resources.getBoolean(R.bool.should_lock_screen)) {
-            textViewTouchBlock.isVisible = true
-            Handler(Looper.getMainLooper()).postDelayed({
-                executeCommand("su -c input keyevent 223")
-            }, 100)
-            return
-        }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         onBackPressedDispatcher.addCallback {}
         sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)

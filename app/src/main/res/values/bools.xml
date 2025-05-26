@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <bool name="should_lock_screen">false</bool>
     <bool name="should_use_proximity">true</bool>
     <bool name="should_animate_layout_changes">false</bool>
     <bool name="should_minimise">true</bool>
