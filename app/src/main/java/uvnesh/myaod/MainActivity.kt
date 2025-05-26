@@ -437,17 +437,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 handler.postDelayed(this, 1000) // 1 second delay
             }
         }
-        if (resources.getBoolean(R.bool.should_unlock_on_tap)) {
-            findViewById<View>(R.id.fpView).setOnClickListener {
-//                finishApp()
-                goHome()
-            }
-        } else {
-            findViewById<View>(R.id.fpView).setOnLongClickListener {
-//                finishApp()
-                goHome()
-                true
-            }
+        findViewById<View>(R.id.fpView).setOnClickListener {
+//            finishApp()
+            goHome()
         }
         if (resources.getBoolean(R.bool.should_allow_clock_switching)) {
             swipeDetectableView.setOnLongPressCallback {
