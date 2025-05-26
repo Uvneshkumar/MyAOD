@@ -601,8 +601,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             notificationSmall.addView(ImageView(this).apply {
                 post {
                     setPadding(0, 5.px, 5.px, 5.px)
-                    layoutParams.height = 40.px
-                    layoutParams.width = 40.px
+                    layoutParams.height = 50.px
+                    layoutParams.width = 50.px
                     requestLayout()
                     setImageDrawable(iconDrawable)
                 }
