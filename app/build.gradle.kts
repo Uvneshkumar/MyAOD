@@ -31,9 +31,6 @@ android {
         create("s20") {
             initWith(getByName("release"))
         }
-        create("walleye") {
-            initWith(getByName("release"))
-        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
