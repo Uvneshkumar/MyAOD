@@ -108,20 +108,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private val resultCodeGoogle = 9001
     private val scope = listOf(CalendarScopes.CALENDAR_READONLY)
 
-    private fun finishApp(shouldMinimise: Boolean = false) {
-        if (!shouldMinimise) {
-            textViewTouchBlock.animateAlpha(240)
-            textViewTouchBlock.isVisible = true
-        }
+    private fun finishApp() {
         enableTouch()
         if (!isHome) {
             playSound(false)
         }
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (!shouldMinimise) {
-                finishAndRemoveTask()
-            }
-        }, 120)
     }
 
     private fun blockTouch() {
@@ -145,10 +136,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         handler.removeCallbacks(timeRunnable)
         sensorManager.unregisterListener(this)
-//        if (!isFinishing) {
-//            finishApp()
-        finishApp(resources.getBoolean(R.bool.should_minimise))
-//        }
+        finishApp()
     }
 
     private val appListItems: MutableSet<Pair<String, Drawable>> = mutableSetOf()
@@ -423,7 +411,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
         findViewById<View>(R.id.fpView).setOnClickListener {
-//            finishApp()
             goHome()
         }
         if (resources.getBoolean(R.bool.should_allow_clock_switching)) {
