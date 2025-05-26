@@ -21,6 +21,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.media.AudioManager
+import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.BatteryManager
 import android.os.Bundle
@@ -292,8 +293,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private var isHome = false
 
+    private var notificationManager: NotificationManager? = null
+    private var lockRingtone: Ringtone? = null
+    private var unlockRingtone: Ringtone? = null
+
     private fun createNotificationChannel() {
-        val notificationManager = getSystemService(NotificationManager::class.java)
+        if (notificationManager == null) {
+            notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+        }
         val lockChannel = NotificationChannel(
             LOCK_CHANNEL, "Lock Channel", NotificationManager.IMPORTANCE_HIGH
         ).apply {
@@ -304,20 +312,35 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         ).apply {
             description = name.toString()
         }
-        notificationManager.createNotificationChannel(lockChannel)
-        notificationManager.createNotificationChannel(unlockChannel)
+        notificationManager?.createNotificationChannel(lockChannel)
+        notificationManager?.createNotificationChannel(unlockChannel)
     }
 
     private fun playSound(isLock: Boolean = true) {
-        if (resources.getBoolean(R.bool.should_use_volume) && isRingerModeNormal()) {
-            val notificationManager =
+        if (notificationManager == null) {
+            notificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
-            val channel = if (isLock) {
-                notificationManager?.getNotificationChannel(LOCK_CHANNEL)
-            } else {
-                notificationManager?.getNotificationChannel(UNLOCK_CHANNEL)
+        }
+        if (isLock) {
+            if (resources.getBoolean(R.bool.should_use_lock_volume) && isRingerModeNormal()) {
+                if (lockRingtone == null) {
+                    lockRingtone = RingtoneManager.getRingtone(
+                        applicationContext,
+                        notificationManager?.getNotificationChannel(LOCK_CHANNEL)?.sound
+                    )
+                }
+                lockRingtone?.play()
             }
-            RingtoneManager.getRingtone(applicationContext, channel?.sound).play()
+        } else {
+            if (resources.getBoolean(R.bool.should_use_unlock_volume) && isRingerModeNormal()) {
+                if (unlockRingtone == null) {
+                    unlockRingtone = RingtoneManager.getRingtone(
+                        applicationContext,
+                        notificationManager?.getNotificationChannel(UNLOCK_CHANNEL)?.sound
+                    )
+                }
+                unlockRingtone?.play()
+            }
         }
     }
 
