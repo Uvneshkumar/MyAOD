@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="large_clock_margin_top">160dp</dimen>
-    <dimen name="fingerprint_margin_bottom">140dp</dimen>
-    <dimen name="battery_margin_bottom">80dp</dimen>
     <dimen name="top_margin">20dp</dimen>
     <dimen name="layout_margin">20dp</dimen>
     <dimen name="small_clock_margin">16dp</dimen>

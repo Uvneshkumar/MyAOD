@@ -436,7 +436,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 handler.postDelayed(this, 1000) // 1 second delay
             }
         }
-        findViewById<View>(R.id.fpView).setOnClickListener {
+        swipeDetectableView.setOnClickCallback {
             goHome()
         }
         if (resources.getBoolean(R.bool.should_allow_clock_switching)) {

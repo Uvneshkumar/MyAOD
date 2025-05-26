@@ -15,6 +15,7 @@ class SwipeDetectableView @JvmOverloads constructor(
 
     private lateinit var gestureDetector: GestureDetector
     private var onLongPress = {}
+    private var onClick = {}
 
     init {
         setupGestureDetection()
@@ -22,6 +23,10 @@ class SwipeDetectableView @JvmOverloads constructor(
 
     fun setOnLongPressCallback(longPressCallback: () -> Unit) {
         onLongPress = longPressCallback
+    }
+
+    fun setOnClickCallback(onClickCallback: () -> Unit) {
+        onClick = onClickCallback
     }
 
     private fun setupGestureDetection() {
@@ -57,6 +62,11 @@ class SwipeDetectableView @JvmOverloads constructor(
                 override fun onLongPress(e: MotionEvent) {
                     super.onLongPress(e)
                     onLongPress()
+                }
+
+                override fun onSingleTapUp(e: MotionEvent): Boolean {
+                    onClick()
+                    return super.onSingleTapUp(e)
                 }
             })
     }
