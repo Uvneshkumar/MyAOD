@@ -94,7 +94,7 @@ class SwipeDetectableView @JvmOverloads constructor(
 
     private fun onSwipeDown(x: Float) {
         val totalWidth = measuredWidth
-        if (x >= 0.80 * totalWidth) {
+        if (x >= 0.65 * totalWidth) {
             executeCommand("su -c cmd statusbar expand-settings")
         } else {
             executeCommand("su -c cmd statusbar expand-notifications")
