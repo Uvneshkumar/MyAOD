@@ -172,6 +172,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         handler.removeCallbacks(timeRunnable)
         sensorManager.unregisterListener(this)
         finishApp()
+        executeCommand("su -c rm -f /sdcard/myaod_active", true)
     }
 
     private val appListItems: MutableSet<Pair<String, Drawable>> = mutableSetOf()
@@ -578,6 +579,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 endBlock()
             }
         }
+        executeCommand("su -c touch /sdcard/myaod_active", true)
     }
 
     private fun endBlock() {
