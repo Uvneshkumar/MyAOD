@@ -30,6 +30,7 @@ import android.os.Handler
 import android.os.Looper
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
@@ -111,6 +112,28 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private val resultCodeGoogle = 9001
     private val scope = listOf(CalendarScopes.CALENDAR_READONLY)
 
+    private var enable_refresh_rate_switching = false
+    private var low_refresh_rate = 6
+    private var high_refresh_rate = 0
+
+    private val inactivityTimeout: Long = 60_000 // 60 seconds
+    private val refreshRateHandler = Handler(Looper.getMainLooper())
+    private var isLow = false
+
+    private fun lowRefreshRate() {
+        isLow = true
+        executeCommand("su -c service call SurfaceFlinger 1035 i32 $low_refresh_rate")
+    }
+
+    private fun highRefreshRate() {
+        executeCommand("su -c service call SurfaceFlinger 1035 i32 $high_refresh_rate")
+        isLow = false
+    }
+
+    private val inactivityRunnable = Runnable {
+        lowRefreshRate()
+    }
+
     private fun finishApp() {
         enableTouch()
         if (!isHome) {
@@ -131,6 +154,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onPause() {
         super.onPause()
+        if (enable_refresh_rate_switching) {
+            highRefreshRate()
+            refreshRateHandler.removeCallbacks(inactivityRunnable)
+        }
         if (shouldTriggerLogin) {
             isLoginTriggered = true
         }
@@ -385,6 +412,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         lifecycleScope.launch {
             loadAppIcons()
         }
+        enable_refresh_rate_switching = resources.getBoolean(R.bool.enable_refresh_rate_switching)
+        low_refresh_rate = resources.getInteger(R.integer.low_refresh_rate)
+        high_refresh_rate = resources.getInteger(R.integer.high_refresh_rate)
         swipeDetectableView = findViewById(R.id.swipeDetectableView)
         textViewTouchBlock = findViewById(R.id.touchBlock)
         rootAnim = findViewById(R.id.rootAnim)
@@ -494,8 +524,29 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         ) 80.px.toFloat() else -40.px.toFloat()
     }
 
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        if (enable_refresh_rate_switching) {
+            if (ev?.action == MotionEvent.ACTION_DOWN) {
+                if (isLow) {
+                    highRefreshRate()
+                }
+                resetInactivityTimer()
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private fun resetInactivityTimer() {
+        refreshRateHandler.removeCallbacks(inactivityRunnable)
+        refreshRateHandler.postDelayed(inactivityRunnable, inactivityTimeout)
+    }
+
     override fun onResume() {
         super.onResume()
+        if (enable_refresh_rate_switching) {
+            highRefreshRate()
+            resetInactivityTimer()
+        }
         handler.removeCallbacks(timeRunnable)
         handler.post(timeRunnable)
         rootAnim.alpha = 1f

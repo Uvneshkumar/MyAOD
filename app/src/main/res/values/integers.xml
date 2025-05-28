@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="low_refresh_rate">6</integer>
+    <integer name="high_refresh_rate">0</integer>
+</resources>
