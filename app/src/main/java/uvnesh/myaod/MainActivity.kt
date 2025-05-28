@@ -421,7 +421,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         lifecycleScope.launch {
             loadAppIcons()
         }
-        isSamsung = Build.BRAND == "samsung"
+        isSamsung =
+            Build.BRAND == "samsung" && executeCommand("su -c getprop ro.build.version.oneui").trim()
+                .isNotEmpty()
         enable_refresh_rate_switching = resources.getBoolean(R.bool.enable_refresh_rate_switching)
         low_refresh_rate = resources.getInteger(R.integer.low_refresh_rate)
         high_refresh_rate = resources.getInteger(R.integer.high_refresh_rate)
@@ -641,9 +643,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         notificationSmall.removeAllViews()
         notificationPackages.clear()
         textViewMediaItem.text = ""
-        val fullScreenNotification = activeNotifications.value.orEmpty()
-            .firstOrNull { it.notification.fullScreenIntent != null }
-        if (fullScreenNotification != null) {
+        val fullScreenOrSamsungAlarmNotification = activeNotifications.value.orEmpty()
+            .firstOrNull { it.notification.fullScreenIntent != null || (it.packageName == "com.sec.android.app.clockpackage" && it.notification.channelId == "notification_channel_firing_alarm_and_timer") }
+        if (fullScreenOrSamsungAlarmNotification != null) {
             isFullScreenNotificationTriggered = true
             if (enable_refresh_rate_switching) {
                 highRefreshRate()
@@ -652,7 +654,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 executeCommand("su -c cmd statusbar expand-notifications", true)
             }
             Handler(Looper.getMainLooper()).postDelayed({
-                executeCommand("su -c input tap 400 ${if (isSamsung) 340 else 200}", true)
+                executeCommand(
+                    "su -c input tap 400 ${
+                        if (isSamsung) {
+                            if (fullScreenOrSamsungAlarmNotification.notification.fullScreenIntent == null) 400 else 340
+                        } else 200
+                    }", true
+                )
             }, 1000)
             return
         }
