@@ -49,7 +49,7 @@ class SwipeDetectableView @JvmOverloads constructor(
                     ) {
                         if (deltaY > 0) {
                             // Swipe down
-                            onSwipeDown(e2.x)
+                            onSwipeDown(e1?.x ?: 0f)
                         } else {
                             // Swipe up
                             onSwipeUp()
