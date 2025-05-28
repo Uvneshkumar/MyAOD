@@ -121,13 +121,18 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var isLow = false
 
     private fun lowRefreshRate() {
+        if (!isLow) {
+            executeCommand("su -c service call SurfaceFlinger 1035 i32 $low_refresh_rate")
+        }
         isLow = true
-        executeCommand("su -c service call SurfaceFlinger 1035 i32 $low_refresh_rate")
     }
 
     private fun highRefreshRate() {
-        executeCommand("su -c service call SurfaceFlinger 1035 i32 $high_refresh_rate")
+        if (isLow) {
+            executeCommand("su -c service call SurfaceFlinger 1035 i32 $high_refresh_rate")
+        }
         isLow = false
+        resetInactivityTimer()
     }
 
     private val inactivityRunnable = Runnable {
@@ -527,10 +532,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         if (enable_refresh_rate_switching) {
             if (ev?.action == MotionEvent.ACTION_DOWN) {
-                if (isLow) {
-                    highRefreshRate()
-                }
-                resetInactivityTimer()
+                highRefreshRate()
             }
         }
         return super.dispatchTouchEvent(ev)
@@ -545,7 +547,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         super.onResume()
         if (enable_refresh_rate_switching) {
             highRefreshRate()
-            resetInactivityTimer()
         }
         handler.removeCallbacks(timeRunnable)
         handler.post(timeRunnable)
@@ -629,10 +630,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private fun setNotificationInfo() {
         if (enable_refresh_rate_switching) {
-            if (isLow) {
-                highRefreshRate()
-            }
-            resetInactivityTimer()
+            highRefreshRate()
         }
         notificationSmall.removeAllViews()
         notificationPackages.clear()
