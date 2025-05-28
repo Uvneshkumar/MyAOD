@@ -628,6 +628,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun setNotificationInfo() {
+        if (enable_refresh_rate_switching) {
+            if (isLow) {
+                highRefreshRate()
+            }
+            resetInactivityTimer()
+        }
         notificationSmall.removeAllViews()
         notificationPackages.clear()
         textViewMediaItem.text = ""
