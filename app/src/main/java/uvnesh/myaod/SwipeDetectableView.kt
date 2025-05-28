@@ -1,6 +1,7 @@
 package uvnesh.myaod
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.content.Context
 import android.util.AttributeSet
 import android.view.GestureDetector
@@ -39,19 +40,15 @@ class SwipeDetectableView @JvmOverloads constructor(
                 override fun onFling(
                     e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float
                 ): Boolean {
-                    // Calculate the distance moved
                     val deltaY = e2.y - (e1?.y ?: 0f)
                     val deltaX = e2.x - (e1?.x ?: 0f)
-                    // Check if it's a vertical swipe and meets the minimum velocity and distance
                     if (abs(deltaY) > abs(deltaX) && abs(deltaY) > SWIPE_THRESHOLD_VELOCITY && abs(
                             deltaY
                         ) > MIN_SWIPE_DISTANCE
                     ) {
                         if (deltaY > 0) {
-                            // Swipe down
                             onSwipeDown(e1?.x ?: 0f)
                         } else {
-                            // Swipe up
                             onSwipeUp()
                         }
                         return true
@@ -59,14 +56,16 @@ class SwipeDetectableView @JvmOverloads constructor(
                             deltaX
                         ) > MIN_SWIPE_DISTANCE
                     ) {
-                        if (deltaX > 0) {
-                            // Swipe right
-                            onSwipeRight()
-                        } else {
-                            // Swipe left
-                            onSwipeLeft()
+                        if (MainActivity.activeNotifications.value.orEmpty()
+                                .any { it.notification.extras.containsKey(Notification.EXTRA_MEDIA_SESSION) }
+                        ) {
+                            if (deltaX > 0) {
+                                onSwipeRight()
+                            } else {
+                                onSwipeLeft()
+                            }
+                            return true
                         }
-                        return true
                     }
                     return false
                 }
@@ -102,12 +101,10 @@ class SwipeDetectableView @JvmOverloads constructor(
     }
 
     private fun onSwipeLeft() {
-        // starts media even if not playing already
         executeCommand("su -c  cmd media_session dispatch previous")
     }
 
     private fun onSwipeRight() {
-        // starts media even if not playing already
         executeCommand("su -c  cmd media_session dispatch next")
     }
 
