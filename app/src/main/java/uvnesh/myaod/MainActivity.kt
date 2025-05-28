@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.AlarmManager
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -83,6 +84,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var textViewLargeTimeMinutesTwo: TextView
     private lateinit var textViewInfo: TextView
     private lateinit var textViewBattery: TextView
+    private lateinit var textViewMediaItem: TextView
     private lateinit var infoRoot: LinearLayout
     private lateinit var textViewAlarm: TextView
     private lateinit var textViewTouchBlock: TextView
@@ -401,6 +403,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         textViewLargeTimeMinutesTwo = findViewById(R.id.largeTimeMinutesTwo)
         textViewInfo = findViewById(R.id.info)
         textViewBattery = findViewById(R.id.battery)
+        textViewMediaItem = findViewById(R.id.mediaItem)
         infoRoot = findViewById(R.id.info_root)
         textViewAlarm = findViewById(R.id.alarm)
         textViewTouchBlock.setOnTouchListener { v, event ->
@@ -576,6 +579,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun setNotificationInfo() {
         notificationSmall.removeAllViews()
         notificationPackages.clear()
+        textViewMediaItem.text = ""
         // Loop through the notifications
         for (notification in activeNotifications.value.orEmpty()) {
             if (notification.notification?.fullScreenIntent != null && notification.notification.channelId == "Firing" && notification.packageName == "com.google.android.deskclock" && notification.notification.actions?.size == 2) {
@@ -605,6 +609,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     layoutParams.width = 50.px
                     requestLayout()
                     setImageDrawable(iconDrawable)
+                    if (notification.notification.extras.containsKey(Notification.EXTRA_MEDIA_SESSION)) {
+                        textViewMediaItem.text =
+                            notification.notification.extras.getString(Notification.EXTRA_TITLE)
+                    }
                 }
             })
             // You can access more details depending on your needs

@@ -207,6 +207,23 @@
             app:layout_constraintStart_toStartOf="parent"
             tools:ignore="RtlSymmetry" />
 
+        <TextView
+            android:id="@+id/mediaItem"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/layout_margin"
+            android:layout_marginBottom="@dimen/notification_small_margin_bottom"
+            android:ellipsize="middle"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@android:color/white"
+            android:textSize="24sp"
+            app:layout_constraintBottom_toTopOf="@id/notificationSmall"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="Media Item" />
+
         <uvnesh.myaod.SwipeDetectableView
             android:id="@+id/swipeDetectableView"
             android:layout_width="match_parent"

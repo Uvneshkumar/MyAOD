@@ -55,6 +55,18 @@ class SwipeDetectableView @JvmOverloads constructor(
                             onSwipeUp()
                         }
                         return true
+                    } else if (abs(deltaX) > abs(deltaY) && abs(deltaX) > SWIPE_THRESHOLD_VELOCITY && abs(
+                            deltaX
+                        ) > MIN_SWIPE_DISTANCE
+                    ) {
+                        if (deltaX > 0) {
+                            // Swipe right
+                            onSwipeRight()
+                        } else {
+                            // Swipe left
+                            onSwipeLeft()
+                        }
+                        return true
                     }
                     return false
                 }
@@ -87,6 +99,16 @@ class SwipeDetectableView @JvmOverloads constructor(
         } else {
             executeCommand("su -c cmd statusbar expand-notifications")
         }
+    }
+
+    private fun onSwipeLeft() {
+        // starts media even if not playing already
+        executeCommand("su -c  cmd media_session dispatch previous")
+    }
+
+    private fun onSwipeRight() {
+        // starts media even if not playing already
+        executeCommand("su -c  cmd media_session dispatch next")
     }
 
     companion object {
