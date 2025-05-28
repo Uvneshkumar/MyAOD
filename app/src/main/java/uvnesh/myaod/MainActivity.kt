@@ -163,6 +163,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             highRefreshRate()
             refreshRateHandler.removeCallbacks(inactivityRunnable)
         }
+        executeCommand("su -c rm -f /sdcard/myaod_active", true)
         if (shouldTriggerLogin) {
             isLoginTriggered = true
         }
@@ -172,7 +173,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         handler.removeCallbacks(timeRunnable)
         sensorManager.unregisterListener(this)
         finishApp()
-        executeCommand("su -c rm -f /sdcard/myaod_active", true)
     }
 
     private val appListItems: MutableSet<Pair<String, Drawable>> = mutableSetOf()
