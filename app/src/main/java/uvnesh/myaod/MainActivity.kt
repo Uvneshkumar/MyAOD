@@ -25,6 +25,7 @@ import android.media.AudioManager
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.BatteryManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -111,6 +112,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var googleSignInClient: GoogleSignInClient
     private val resultCodeGoogle = 9001
     private val scope = listOf(CalendarScopes.CALENDAR_READONLY)
+
+    private var isSamsung = false
 
     private var enable_refresh_rate_switching = false
     private var low_refresh_rate = 6
@@ -418,6 +421,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         lifecycleScope.launch {
             loadAppIcons()
         }
+        isSamsung = Build.BRAND == "samsung"
         enable_refresh_rate_switching = resources.getBoolean(R.bool.enable_refresh_rate_switching)
         low_refresh_rate = resources.getInteger(R.integer.low_refresh_rate)
         high_refresh_rate = resources.getInteger(R.integer.high_refresh_rate)
@@ -637,15 +641,23 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         notificationSmall.removeAllViews()
         notificationPackages.clear()
         textViewMediaItem.text = ""
+        val fullScreenNotification = activeNotifications.value.orEmpty()
+            .firstOrNull { it.notification.fullScreenIntent != null }
+        if (fullScreenNotification != null) {
+            isFullScreenNotificationTriggered = true
+            if (enable_refresh_rate_switching) {
+                highRefreshRate()
+            }
+            if (isSamsung) {
+                executeCommand("su -c cmd statusbar expand-notifications", true)
+            }
+            Handler(Looper.getMainLooper()).postDelayed({
+                executeCommand("su -c input tap 400 ${if (isSamsung) 340 else 200}", true)
+            }, 1000)
+            return
+        }
         // Loop through the notifications
         for (notification in activeNotifications.value.orEmpty()) {
-            if (notification.notification?.fullScreenIntent != null && notification.notification.channelId == "Firing" && notification.packageName == "com.google.android.deskclock" && notification.notification.actions?.size == 2) {
-                isFullScreenNotificationTriggered = true
-                Handler(Looper.getMainLooper()).postDelayed({
-                    executeCommand("su -c input tap 400 200")
-                }, 1000)
-                continue
-            }
             // Extract information from each notification
             val packageName = notification.packageName
             if (notificationPackages.contains(packageName) || notification.notification.visibility == -1 || (packageName == "com.android.systemui" && notification.notification.channelId == "CHR")) {
