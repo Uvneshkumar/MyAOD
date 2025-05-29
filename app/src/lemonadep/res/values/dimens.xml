@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="large_clock_margin_top">260dp</dimen>
-    <dimen name="top_margin">110dp</dimen>
+    <dimen name="large_clock_margin_top">240dp</dimen>
+    <dimen name="top_margin">80dp</dimen>
 </resources>
