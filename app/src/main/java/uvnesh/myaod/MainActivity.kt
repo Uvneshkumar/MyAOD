@@ -89,10 +89,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private var proximitySensor: Sensor? = null
 
-    private var isFullScreenNotificationTriggered = false
-    private var shouldTriggerLogin = false
-    private var isLoginTriggered = false
-
     private lateinit var googleSignInClient: GoogleSignInClient
     private val resultCodeGoogle = 9001
     private val scope = listOf(CalendarScopes.CALENDAR_READONLY)
@@ -151,12 +147,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             refreshRateHandler.removeCallbacks(inactivityRunnable)
         }
         executeCommand("su -c rm -f /sdcard/myaod_active", true)
-        if (shouldTriggerLogin) {
-            isLoginTriggered = true
-        }
-        if (isFullScreenNotificationTriggered || isLoginTriggered) {
-            return
-        }
         handler.removeCallbacks(timeRunnable)
         sensorManager.unregisterListener(this)
         finishApp()
@@ -180,14 +170,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private fun signIn() {
         val signInIntent = googleSignInClient.signInIntent
-        shouldTriggerLogin = true
         startActivityForResult(signInIntent, resultCodeGoogle)
     }
 
     @Deprecated("Deprecated")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        shouldTriggerLogin = false
         if (requestCode == resultCodeGoogle) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
@@ -527,9 +515,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         handler.removeCallbacks(timeRunnable)
         handler.post(timeRunnable)
         binding.rootAnim.alpha = 1f
-        if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
-            playSound()
-        }
+        playSound()
         binding.smallTime.post {
             if (isHome) {
                 isHome = false
@@ -558,18 +544,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun endBlock() {
-        if (!isFullScreenNotificationTriggered) {
-            if (isLoginTriggered) {
-                isLoginTriggered = false
-            } else {
-                proximitySensor?.also { sensor ->
-                    sensorManager.registerListener(
-                        this@MainActivity, sensor, SensorManager.SENSOR_DELAY_NORMAL
-                    )
-                }
-            }
+        proximitySensor?.also { sensor ->
+            sensorManager.registerListener(
+                this@MainActivity, sensor, SensorManager.SENSOR_DELAY_NORMAL
+            )
         }
-        isFullScreenNotificationTriggered = false
     }
 
     @SuppressLint("SetTextI18n")
@@ -615,7 +594,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val fullScreenOrSamsungAlarmNotification = activeNotifications.value.orEmpty()
             .firstOrNull { it.notification.fullScreenIntent != null || (it.packageName == "com.sec.android.app.clockpackage" && it.notification.channelId == "notification_channel_firing_alarm_and_timer") }
         if (fullScreenOrSamsungAlarmNotification != null) {
-            isFullScreenNotificationTriggered = true
             if (enable_refresh_rate_switching) {
                 highRefreshRate()
             }
