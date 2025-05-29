@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <bool name="should_use_proximity">true</bool>
+    <bool name="should_use_proximity">false</bool>
     <bool name="should_animate_layout_changes">false</bool>
     <bool name="should_allow_clock_switching">true</bool>
     <bool name="should_use_lock_volume">true</bool>
