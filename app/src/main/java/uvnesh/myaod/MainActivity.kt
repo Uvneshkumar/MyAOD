@@ -591,25 +591,27 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         binding.notificationSmall.removeAllViews()
         notificationPackages.clear()
         binding.mediaItem.text = ""
-        val fullScreenOrSamsungAlarmNotification = activeNotifications.value.orEmpty()
-            .firstOrNull { it.notification.fullScreenIntent != null || (it.packageName == "com.sec.android.app.clockpackage" && it.notification.channelId == "notification_channel_firing_alarm_and_timer") }
-        if (fullScreenOrSamsungAlarmNotification != null) {
-            if (enable_refresh_rate_switching) {
-                highRefreshRate()
+        if (!binding.touchBlock.isVisible) {
+            val fullScreenOrSamsungAlarmNotification = activeNotifications.value.orEmpty()
+                .firstOrNull { it.notification.fullScreenIntent != null || (it.packageName == "com.sec.android.app.clockpackage" && it.notification.channelId == "notification_channel_firing_alarm_and_timer") }
+            if (fullScreenOrSamsungAlarmNotification != null) {
+                if (enable_refresh_rate_switching) {
+                    highRefreshRate()
+                }
+                if (isSamsung) {
+                    executeCommand("su -c cmd statusbar expand-notifications", true)
+                }
+                Handler(Looper.getMainLooper()).postDelayed({
+                    executeCommand(
+                        "su -c input tap 400 ${
+                            if (isSamsung) {
+                                if (fullScreenOrSamsungAlarmNotification.notification.fullScreenIntent == null) 400 else 340
+                            } else 200
+                        }", true
+                    )
+                }, 1000)
+                return
             }
-            if (isSamsung) {
-                executeCommand("su -c cmd statusbar expand-notifications", true)
-            }
-            Handler(Looper.getMainLooper()).postDelayed({
-                executeCommand(
-                    "su -c input tap 400 ${
-                        if (isSamsung) {
-                            if (fullScreenOrSamsungAlarmNotification.notification.fullScreenIntent == null) 400 else 340
-                        } else 200
-                    }", true
-                )
-            }, 1000)
-            return
         }
         // Loop through the notifications
         for (notification in activeNotifications.value.orEmpty()) {
@@ -700,13 +702,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 if (it.values[0] <= 0f) {
                     // Proximity sensor is covered
                     // Add your logic here
-                    blockTouch()
                     binding.touchBlock.isVisible = true
+                    blockTouch()
                 } else {
                     // Proximity sensor is not covered
                     // Add your logic here
-                    binding.touchBlock.isVisible = false
                     enableTouch()
+                    binding.touchBlock.isVisible = false
                 }
             }
         }
