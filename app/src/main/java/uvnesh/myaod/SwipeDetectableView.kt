@@ -3,10 +3,13 @@ package uvnesh.myaod
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.content.Context
+import android.os.VibrationEffect
+import android.os.VibratorManager
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity.VIBRATOR_MANAGER_SERVICE
 import uvnesh.myaod.MainActivity.Companion.executeCommand
 import kotlin.math.abs
 
@@ -15,10 +18,12 @@ class SwipeDetectableView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     private lateinit var gestureDetector: GestureDetector
+    private var mVibrationManager: VibratorManager? = null
     private var onLongPress = {}
     private var onClick = {}
 
     init {
+        mVibrationManager = context.getSystemService(VIBRATOR_MANAGER_SERVICE) as? VibratorManager
         setupGestureDetection()
     }
 
@@ -59,6 +64,11 @@ class SwipeDetectableView @JvmOverloads constructor(
                         if (MainActivity.activeNotifications.value.orEmpty()
                                 .any { it.notification.extras.containsKey(Notification.EXTRA_MEDIA_SESSION) }
                         ) {
+                            mVibrationManager?.defaultVibrator?.vibrate(
+                                VibrationEffect.createPredefined(
+                                    VibrationEffect.EFFECT_CLICK
+                                )
+                            )
                             if (deltaX > 0) {
                                 onSwipeRight()
                             } else {
