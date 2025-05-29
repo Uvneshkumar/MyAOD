@@ -35,8 +35,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -67,6 +65,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uvnesh.myaod.LockWidget.isFromWidget
+import uvnesh.myaod.databinding.ActivityMainBinding
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
@@ -76,22 +75,7 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
-    private lateinit var swipeDetectableView: SwipeDetectableView
-    private lateinit var innerLayout: View
-    private lateinit var textViewDate: TextView
-    private lateinit var textViewSmallTime: TextView
-    private lateinit var textViewLargeTimeHoursOne: TextView
-    private lateinit var textViewLargeTimeHoursTwo: TextView
-    private lateinit var textViewLargeTimeMinutesOne: TextView
-    private lateinit var textViewLargeTimeMinutesTwo: TextView
-    private lateinit var textViewInfo: TextView
-    private lateinit var textViewBattery: TextView
-    private lateinit var textViewMediaItem: TextView
-    private lateinit var infoRoot: LinearLayout
-    private lateinit var textViewAlarm: TextView
-    private lateinit var textViewTouchBlock: TextView
-    private lateinit var rootAnim: View
-    private lateinit var notificationSmall: LinearLayout
+    private lateinit var binding: ActivityMainBinding
 
     private val shiftHandler = Handler(Looper.getMainLooper())
     private lateinit var handler: Handler
@@ -266,9 +250,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             withContext(Dispatchers.Main) {
                 if (event == null) {
                     Log.d("Calendar", "No upcoming events found")
-                    infoRoot.isVisible = false
-                    textViewInfo.text = "No upcoming events today"
-                    currentInfo = textViewInfo.text.toString()
+                    binding.infoRoot.isVisible = false
+                    binding.info.text = "No upcoming events today"
+                    currentInfo = binding.info.text.toString()
                     currentInfoTime = Long.MAX_VALUE
                     // No Events Today. Fetch Again after next day
                     val checkOnNextDayRunnable = object : Runnable {
@@ -306,15 +290,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                                 val startTime = hmmaFormat.format(startDate.time)
                                 "${event.summary} at $startTime"
                             }
-                            if (infoRoot.isGone || textViewInfo.text == getString(R.string.info)) {
-                                infoRoot.isVisible = true
-                                textViewInfo.text = nextEvent
-                                currentInfo = textViewInfo.text.toString()
+                            if (binding.infoRoot.isGone || binding.info.text == getString(R.string.info)) {
+                                binding.infoRoot.isVisible = true
+                                binding.info.text = nextEvent
+                                currentInfo = binding.info.text.toString()
                                 currentInfoTime = startDate.timeInMillis
-                                infoRoot.animateAlpha(400)
-                            } else if (textViewInfo.text != nextEvent) {
-                                textViewInfo.text = nextEvent
-                                currentInfo = textViewInfo.text.toString()
+                                binding.infoRoot.animateAlpha(400)
+                            } else if (binding.info.text != nextEvent) {
+                                binding.info.text = nextEvent
+                                currentInfo = binding.info.text.toString()
                                 currentInfoTime = startDate.timeInMillis
                             }
                             Handler(Looper.getMainLooper()).postDelayed(this, 1000)
@@ -389,10 +373,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         playSound(false)
         isHome = true
         executeCommand("su -c input keyevent 3", true)
-        rootAnim.alpha = 1f
-        rootAnim.isVisible = true
-        rootAnim.post {
-            findViewById<View>(R.id.main).translationY = topMargin()
+        binding.rootAnim.alpha = 1f
+        binding.rootAnim.isVisible = true
+        binding.rootAnim.post {
+            binding.main.translationY = topMargin()
         }
     }
 
@@ -411,12 +395,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         enableEdgeToEdge()
         setShowWhenLocked(false)
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         createNotificationChannel()
         val height = getSystem().displayMetrics.heightPixels
         val width = getSystem().displayMetrics.widthPixels
         val exclusionRects = listOf(Rect(0, 0, width, height))
-        setSystemGestureExclusionRects(findViewById(R.id.main), exclusionRects)
+        setSystemGestureExclusionRects(binding.main, exclusionRects)
         findViewById<View>(android.R.id.content).setBackgroundColor(getColor(android.R.color.black))
         lifecycleScope.launch {
             loadAppIcons()
@@ -427,34 +412,18 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         enable_refresh_rate_switching = resources.getBoolean(R.bool.enable_refresh_rate_switching)
         low_refresh_rate = resources.getInteger(R.integer.low_refresh_rate)
         high_refresh_rate = resources.getInteger(R.integer.high_refresh_rate)
-        swipeDetectableView = findViewById(R.id.swipeDetectableView)
-        textViewTouchBlock = findViewById(R.id.touchBlock)
-        rootAnim = findViewById(R.id.rootAnim)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         onBackPressedDispatcher.addCallback {}
         sharedPrefs = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-        innerLayout = findViewById(R.id.innerLayout)
         val scaleFactor = resources.getFloat(R.dimen.ui_scale)
-        innerLayout.scaleX = scaleFactor
-        innerLayout.scaleY = scaleFactor
-        textViewDate = findViewById(R.id.date)
-        textViewSmallTime = findViewById(R.id.smallTime)
-        textViewLargeTimeHoursOne = findViewById(R.id.largeTimeHoursOne)
-        textViewLargeTimeHoursTwo = findViewById(R.id.largeTimeHoursTwo)
-        textViewLargeTimeMinutesOne = findViewById(R.id.largeTimeMinutesOne)
-        textViewLargeTimeMinutesTwo = findViewById(R.id.largeTimeMinutesTwo)
-        textViewInfo = findViewById(R.id.info)
-        textViewBattery = findViewById(R.id.battery)
-        textViewMediaItem = findViewById(R.id.mediaItem)
-        infoRoot = findViewById(R.id.info_root)
-        textViewAlarm = findViewById(R.id.alarm)
-        textViewTouchBlock.setOnTouchListener { v, event ->
+        binding.innerLayout.scaleX = scaleFactor
+        binding.innerLayout.scaleY = scaleFactor
+        binding.touchBlock.setOnTouchListener { v, event ->
             true
         }
-        notificationSmall = findViewById(R.id.notificationSmall)
         currentInfo?.let {
-            if (textViewInfo.text == getString(R.string.info) && (Date().time < currentInfoTime)) {
-                textViewInfo.text = it
+            if (binding.info.text == getString(R.string.info) && (Date().time < currentInfoTime)) {
+                binding.info.text = it
             }
         }
         if (googleSignInAccount == null) {
@@ -481,11 +450,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 handler.postDelayed(this, 1000) // 1 second delay
             }
         }
-        swipeDetectableView.setOnClickCallback {
+        binding.swipeDetectableView.setOnClickCallback {
             goHome()
         }
         if (resources.getBoolean(R.bool.should_allow_clock_switching)) {
-            swipeDetectableView.setOnLongPressCallback {
+            binding.swipeDetectableView.setOnLongPressCallback {
                 toggleClock(!sharedPrefs.getBoolean("isBig", false))
             }
         }
@@ -500,7 +469,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 }
             }
         })
-        textViewBattery.post {
+        binding.battery.post {
             toggleClock(sharedPrefs.getBoolean("isBig", false))
         }
         startPeriodicShifting()
@@ -523,8 +492,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         animator.duration = 1000L
         animator.addUpdateListener { animation ->
             val fraction = animation.animatedFraction
-            innerLayout.translationX = shiftX * fraction
-            innerLayout.translationY = shiftY * fraction
+            binding.innerLayout.translationX = shiftX * fraction
+            binding.innerLayout.translationY = shiftY * fraction
         }
         animator.start()
     }
@@ -557,16 +526,16 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         handler.removeCallbacks(timeRunnable)
         handler.post(timeRunnable)
-        rootAnim.alpha = 1f
+        binding.rootAnim.alpha = 1f
         if (!isFullScreenNotificationTriggered && !isLoginTriggered) {
             playSound()
         }
-        textViewSmallTime.post {
+        binding.smallTime.post {
             if (isHome) {
                 isHome = false
                 val animDuration = 600L
-                rootAnim.animateAlpha((animDuration * 1.1).toLong(), true)
-                findViewById<View>(R.id.main).apply {
+                binding.rootAnim.animateAlpha((animDuration * 1.1).toLong(), true)
+                binding.main.apply {
                     val animator =
                         ObjectAnimator.ofFloat(this@apply, "translationY", topMargin(), 0f)
                     animator.duration = animDuration
@@ -612,12 +581,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (currentTime.length == 4) {
             currentTime = "0$currentTime"
         }
-        textViewDate.text = currentDate
-        textViewLargeTimeHoursOne.text = currentTime.substring(0, 1)
-        textViewLargeTimeHoursTwo.text = currentTime.substring(1, 2)
-        textViewLargeTimeMinutesOne.text = currentTime.substring(3, 4)
-        textViewLargeTimeMinutesTwo.text = currentTime.substring(4, 5)
-        textViewSmallTime.text =
+        binding.date.text = currentDate
+        binding.largeTimeHoursOne.text = currentTime.substring(0, 1)
+        binding.largeTimeHoursTwo.text = currentTime.substring(1, 2)
+        binding.largeTimeMinutesOne.text = currentTime.substring(3, 4)
+        binding.largeTimeMinutesTwo.text = currentTime.substring(4, 5)
+        binding.smallTime.text =
             if (currentTime.startsWith("0")) currentTime.substringAfter("0") else currentTime
         val bm = getSystemService(BATTERY_SERVICE) as? BatteryManager
         val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { ifilter ->
@@ -632,7 +601,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (chargingText.contains("-  100")) {
             chargingText = "Charged"
         }
-        textViewBattery.text = chargingText
+        binding.battery.text = chargingText
         setAlarmInfo()
     }
 
@@ -640,9 +609,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (enable_refresh_rate_switching) {
             highRefreshRate()
         }
-        notificationSmall.removeAllViews()
+        binding.notificationSmall.removeAllViews()
         notificationPackages.clear()
-        textViewMediaItem.text = ""
+        binding.mediaItem.text = ""
         val fullScreenOrSamsungAlarmNotification = activeNotifications.value.orEmpty()
             .firstOrNull { it.notification.fullScreenIntent != null || (it.packageName == "com.sec.android.app.clockpackage" && it.notification.channelId == "notification_channel_firing_alarm_and_timer") }
         if (fullScreenOrSamsungAlarmNotification != null) {
@@ -679,7 +648,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             // Get the notification's icon
             val iconDrawable = appListItems.find { it.first == notification.packageName }?.second
             // Log or process the notification information as needed
-            notificationSmall.addView(ImageView(this).apply {
+            binding.notificationSmall.addView(ImageView(this).apply {
                 post {
                     setPadding(0, 5.px, 5.px, 5.px)
                     layoutParams.height = 50.px
@@ -687,7 +656,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     requestLayout()
                     setImageDrawable(iconDrawable)
                     if (notification.notification.extras.containsKey(Notification.EXTRA_MEDIA_SESSION)) {
-                        textViewMediaItem.text =
+                        binding.mediaItem.text =
                             notification.notification.extras.getString(Notification.EXTRA_TITLE)
                     }
                 }
@@ -722,16 +691,16 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             val isWithin12Hours = hoursDifference < 12
             if (isWithin12Hours) {
                 // Display or use the alarm time
-                textViewAlarm.text = alarmTimeString
-                textViewAlarm.isVisible = true
+                binding.alarm.text = alarmTimeString
+                binding.alarm.isVisible = true
             } else {
-                textViewAlarm.text = ""
-                textViewAlarm.isVisible = false
+                binding.alarm.text = ""
+                binding.alarm.isVisible = false
             }
         } else {
             // There are no alarms scheduled
-            textViewAlarm.text = ""
-            textViewAlarm.isVisible = false
+            binding.alarm.text = ""
+            binding.alarm.isVisible = false
         }
     }
 
@@ -739,11 +708,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         sharedPrefs.edit {
             putBoolean("isBig", showBigClock)
         }
-        textViewSmallTime.isVisible = !showBigClock
-        textViewLargeTimeHoursOne.isVisible = showBigClock
-        textViewLargeTimeHoursTwo.isVisible = showBigClock
-        textViewLargeTimeMinutesOne.isVisible = showBigClock
-        textViewLargeTimeMinutesTwo.isVisible = showBigClock
+        binding.smallTime.isVisible = !showBigClock
+        binding.largeTimeHoursOne.isVisible = showBigClock
+        binding.largeTimeHoursTwo.isVisible = showBigClock
+        binding.largeTimeMinutesOne.isVisible = showBigClock
+        binding.largeTimeMinutesTwo.isVisible = showBigClock
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
@@ -754,11 +723,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     // Proximity sensor is covered
                     // Add your logic here
                     blockTouch()
-                    textViewTouchBlock.isVisible = true
+                    binding.touchBlock.isVisible = true
                 } else {
                     // Proximity sensor is not covered
                     // Add your logic here
-                    textViewTouchBlock.isVisible = false
+                    binding.touchBlock.isVisible = false
                     enableTouch()
                 }
             }
