@@ -24,7 +24,6 @@ import uvnesh.myaod.MainActivity.Companion.executeCommand
 import uvnesh.myaod.databinding.FloatingNotificationBinding
 import kotlin.math.abs
 
-
 class NotificationService : NotificationListenerService() {
 
     private var mVibrationManager: VibratorManager? = null
@@ -240,7 +239,7 @@ class NotificationService : NotificationListenerService() {
                             }
                         }
                     } else {
-                        if ((overlayView?.root?.y ?: 0f) > swipeStartThreshold) {
+                        if ((overlayView?.root?.y ?: 0f) >= swipeStartThreshold) {
                             openQs()
                         } else {
                             removeNotification()
@@ -262,7 +261,9 @@ class NotificationService : NotificationListenerService() {
                         swipeAndDismiss()
                         dismissConfirmed = false
                     } else {
-                        if (System.currentTimeMillis() - tapStartTime < ViewConfiguration.getLongPressTimeout()) {
+                        if (System.currentTimeMillis() - tapStartTime < ViewConfiguration.getLongPressTimeout()
+                            && abs(overlayView?.root?.x ?: 0f) >= swipeStartThreshold && isXScroll
+                        ) {
                             swipeAndDismiss()
                         } else {
                             overlayView?.root?.animate()?.apply {
