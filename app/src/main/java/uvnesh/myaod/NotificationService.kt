@@ -27,7 +27,7 @@ class NotificationService : NotificationListenerService() {
 
     private val animDuration = 300L
     private val headsUpDismiss = 5500L
-    private var currentShowingNotificationId = -1
+    private var currentShowingNotification: StatusBarNotification? = null
     private val width = getSystem().displayMetrics.widthPixels
     private var isAnimRunning = false
     private var dismissWithoutAnim = false
@@ -99,7 +99,7 @@ class NotificationService : NotificationListenerService() {
         MainActivity.activeNotifications.postValue(activeNotifications)
         if (resources.getBoolean(R.bool.enable_heads_up) && shouldShowHeadsUp(sbn)) {
             showFloatingPopup(applicationContext, sbn)
-            currentShowingNotificationId = sbn?.id ?: -1
+            currentShowingNotification = sbn
         }
     }
 
@@ -124,7 +124,7 @@ class NotificationService : NotificationListenerService() {
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {
         super.onNotificationRemoved(sbn)
         MainActivity.activeNotifications.postValue(activeNotifications)
-        if (currentShowingNotificationId == sbn?.id) {
+        if (currentShowingNotification?.id == sbn?.id) {
             removeNotification()
         }
     }
@@ -161,21 +161,20 @@ class NotificationService : NotificationListenerService() {
                 overlayView = FloatingNotificationBinding.inflate(inflater)
                 val layoutFlag = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
                 val params = WindowManager.LayoutParams(
-                    width - 20.px,
+                    width,
                     WindowManager.LayoutParams.WRAP_CONTENT,
                     layoutFlag,
                     WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                     PixelFormat.TRANSLUCENT
                 )
                 params.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-                params.y = 10.px
                 if (MainActivity.myaod_active) {
                     params.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
                     params.y =
                         (resources.getDimension(R.dimen.notification_small_margin_bottom) + resources.getDimension(
                             R.dimen.battery_margin_bottom
-                        ) + 29.px).toInt()
-                    overlayView?.main?.cardElevation = 0f
+                        ) + 10.px).toInt()
+                    overlayView?.card?.cardElevation = 0f
                 }
                 overlayView?.root?.alpha = 0f
                 windowManager?.addView(overlayView?.root, params)
