@@ -6,4 +6,5 @@
     <bool name="should_use_lock_volume">true</bool>
     <bool name="should_use_unlock_volume">true</bool>
     <bool name="enable_refresh_rate_switching">false</bool>
+    <bool name="enable_heads_up">false</bool>
 </resources>

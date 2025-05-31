@@ -146,13 +146,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             highRefreshRate()
             refreshRateHandler.removeCallbacks(inactivityRunnable)
         }
+        myaod_active = false
         executeCommand("su -c rm -f /sdcard/myaod_active", true)
         handler.removeCallbacks(timeRunnable)
         sensorManager.unregisterListener(this)
         finishApp()
     }
 
-    private val appListItems: MutableSet<Pair<String, Drawable>> = mutableSetOf()
     private val isAppsLoaded = MutableLiveData(false)
 
     private suspend fun loadAppIcons() {
@@ -540,6 +540,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 endBlock()
             }
         }
+        myaod_active = true
         executeCommand("su -c touch /sdcard/myaod_active", true)
     }
 
@@ -720,6 +721,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         private const val LOCK_CHANNEL = "LOCK_CHANNEL"
         private const val UNLOCK_CHANNEL = "UNLOCK_CHANNEL"
+
+        val appListItems: MutableSet<Pair<String, Drawable>> = mutableSetOf()
+        var myaod_active = false
 
         var currentInfo: String? = null
         var currentInfoTime: Long = 0
