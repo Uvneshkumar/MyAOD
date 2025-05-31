@@ -10,18 +10,24 @@ import android.content.res.Resources.getSystem
 import android.graphics.PixelFormat
 import android.os.Handler
 import android.os.Looper
+import android.os.VibrationEffect
+import android.os.VibratorManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.WindowManager
 import uvnesh.myaod.MainActivity.Companion.executeCommand
 import uvnesh.myaod.databinding.FloatingNotificationBinding
+import kotlin.math.abs
 
 
 class NotificationService : NotificationListenerService() {
 
+    private var mVibrationManager: VibratorManager? = null
     private var windowManager: WindowManager? = null
     private var overlayView: FloatingNotificationBinding? = null
 
@@ -81,6 +87,7 @@ class NotificationService : NotificationListenerService() {
         windowManager?.removeView(overlayView?.root)
         overlayView = null
         isAnimRunning = false
+        dismissalBlocked = false
     }
 
     override fun onListenerConnected() {
@@ -149,7 +156,130 @@ class NotificationService : NotificationListenerService() {
         overlayView?.icon?.setImageDrawable(iconDrawable)
     }
 
+    private val headsUpSnapBackDuration = 100L
+    private val swipeStartThreshold = 6
+    private var dX: Float = 0F
+    private var dY: Float = 0F
+    private var isXScroll = true
+    private var isScrollSet = false
+    private var tapStartTime: Long = 0
+    private var dismissConfirmed = false
+    private var dismissalBlocked = false
+
+    private fun openQs() {
+        removeNotification()
+        executeCommand("su -c cmd statusbar expand-notifications")
+    }
+
+    private fun swipeAndDismiss() {
+        overlayView?.root?.animate()?.apply {
+            if ((overlayView?.root?.x
+                    ?: 0f) < 0
+            ) x(-width.toFloat()) else x(width.toFloat())
+            duration = headsUpSnapBackDuration
+            start()
+        }
+        cancelNotification(currentShowingNotification?.key)
+    }
+
+    private fun vibrate() {
+        if (mVibrationManager == null) {
+            mVibrationManager =
+                applicationContext.getSystemService(VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+        }
+        mVibrationManager?.defaultVibrator?.vibrate(
+            VibrationEffect.createPredefined(
+                VibrationEffect.EFFECT_CLICK
+            )
+        )
+    }
+
     @SuppressLint("ClickableViewAccessibility")
+    private fun setUpTouch() {
+        overlayView?.root?.setOnTouchListener { p0, motionEvent ->
+            when (motionEvent?.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    tapStartTime = System.currentTimeMillis()
+                    dismissalBlocked = true
+                    removeViewHandler.removeCallbacks(removeViewRunnable)
+                    dX = (overlayView?.root?.x ?: 0f) - motionEvent.rawX
+                    dY = (overlayView?.root?.y ?: 0f) - motionEvent.rawY
+                    true
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+                    val xScroll = motionEvent.rawX + dX
+                    val yScroll = motionEvent.rawY + dY
+                    if (abs(xScroll) < swipeStartThreshold && abs(yScroll) < swipeStartThreshold && !isScrollSet) {
+                        return@setOnTouchListener true
+                    }
+                    if (!isScrollSet) {
+                        isXScroll = abs(xScroll) > abs(yScroll)
+                        isScrollSet = true
+                    }
+                    overlayView?.root?.animate()?.apply {
+                        if (isXScroll) x(xScroll) else y(yScroll)
+                        duration = 0
+                        start()
+                    }
+                    if (isXScroll) {
+                        if (abs(overlayView?.root?.x ?: 0f)
+                            > ((width - (2 * resources.getDimension(R.dimen.notif_margin))) * 0.5)
+                        ) {
+                            if (!dismissConfirmed) {
+                                dismissConfirmed = true
+                                vibrate()
+                            }
+                        } else {
+                            if (dismissConfirmed) {
+                                dismissConfirmed = false
+                                vibrate()
+                            }
+                        }
+                    } else {
+                        if ((overlayView?.root?.y ?: 0f) > swipeStartThreshold) {
+                            openQs()
+                        } else {
+                            removeNotification()
+                        }
+                        isScrollSet = false
+                    }
+                    true
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    dismissalBlocked = false
+                    scheduleNotificationRemoval()
+                    isScrollSet = false
+                    if (overlayView?.root?.x == 0f && overlayView?.root?.y == 0f && System.currentTimeMillis() - tapStartTime < ViewConfiguration.getLongPressTimeout()) {
+                        openQs()
+                        return@setOnTouchListener true
+                    }
+                    if (dismissConfirmed) {
+                        swipeAndDismiss()
+                        dismissConfirmed = false
+                    } else {
+                        if (System.currentTimeMillis() - tapStartTime < ViewConfiguration.getLongPressTimeout()) {
+                            swipeAndDismiss()
+                        } else {
+                            overlayView?.root?.animate()?.apply {
+                                x(0f)
+                                y(0f)
+                                duration = headsUpSnapBackDuration
+                                start()
+                            }
+                        }
+                    }
+                    true
+                }
+
+                else -> {
+                    false
+                }
+            }
+        }
+    }
+
     private fun showFloatingPopup(context: Context, sbn: StatusBarNotification?) {
         Handler(Looper.getMainLooper()).post {
             if (windowManager == null) {
@@ -179,11 +309,7 @@ class NotificationService : NotificationListenerService() {
                 overlayView?.root?.alpha = 0f
                 windowManager?.addView(overlayView?.root, params)
                 setContent(sbn)
-                overlayView?.root?.setOnTouchListener { v, event ->
-                    removeNotification()
-                    executeCommand("su -c cmd statusbar expand-notifications")
-                    true
-                }
+                setUpTouch()
                 overlayView?.root?.post {
                     val animator = ObjectAnimator.ofFloat(overlayView?.root, "alpha", 0f, 1f)
                     animator.duration = animDuration
@@ -204,6 +330,12 @@ class NotificationService : NotificationListenerService() {
                 overlayView?.innerLayout?.setLayoutParams(layoutParams)
                 setContent(sbn)
             }
+            scheduleNotificationRemoval()
+        }
+    }
+
+    private fun scheduleNotificationRemoval() {
+        if (!dismissalBlocked) {
             removeViewHandler.postDelayed(removeViewRunnable, animDuration + headsUpDismiss)
         }
     }

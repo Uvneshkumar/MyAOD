@@ -4,5 +4,6 @@
     <dimen name="layout_margin">40dp</dimen>
     <dimen name="small_clock_margin">36dp</dimen>
     <dimen name="battery_margin_bottom">60dp</dimen>
+    <dimen name="notif_margin">10dp</dimen>
     <item name="ui_scale" format="float" type="dimen">1.0</item>
 </resources>
