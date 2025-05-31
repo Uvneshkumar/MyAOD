@@ -31,6 +31,7 @@ class NotificationService : NotificationListenerService() {
     private var windowManager: WindowManager? = null
     private var overlayView: FloatingNotificationBinding? = null
 
+    private val notificationIconAddDelay = 400L
     private val animDuration = 300L
     private val headsUpDismiss = 5500L
     private var currentShowingNotification: StatusBarNotification? = null
@@ -103,11 +104,13 @@ class NotificationService : NotificationListenerService() {
         ) {
             return
         }
-        MainActivity.activeNotifications.postValue(activeNotifications)
         if (resources.getBoolean(R.bool.enable_heads_up) && shouldShowHeadsUp(sbn)) {
             showFloatingPopup(applicationContext, sbn)
             currentShowingNotification = sbn
         }
+        Handler(Looper.getMainLooper()).postDelayed({
+            MainActivity.activeNotifications.postValue(activeNotifications)
+        }, notificationIconAddDelay)
     }
 
     private fun shouldShowHeadsUp(sbn: StatusBarNotification?): Boolean {
