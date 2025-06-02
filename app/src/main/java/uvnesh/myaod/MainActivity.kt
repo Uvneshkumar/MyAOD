@@ -487,6 +487,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun shiftContent() {
+        binding.rootAnim.isVisible = true
+        binding.rootAnim.post {
+            binding.rootAnim.isVisible = false
+        }
         val totalTranslation = binding.innerLayout.translationX + binding.innerLayout.translationY
         val (shiftX, shiftY) = getShiftValues(totalTranslation)
         binding.innerLayout.animate()
