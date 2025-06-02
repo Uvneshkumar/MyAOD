@@ -174,6 +174,7 @@ class NotificationService : NotificationListenerService() {
             duration = headsUpSnapBackDuration
             start()
         }
+        removeNotification()
         cancelNotification(currentShowingNotification?.key)
     }
 
