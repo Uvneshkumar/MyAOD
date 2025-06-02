@@ -554,7 +554,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     @SuppressLint("SetTextI18n")
     private fun updateDateTime() {
-        val dateFormat = SimpleDateFormat("EEE, dd MMM", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("EEE, d MMM", Locale.getDefault())
         val timeFormat = SimpleDateFormat("h:mm", Locale.getDefault())
         val currentDate = dateFormat.format(Date())
         var currentTime = timeFormat.format(Date())
