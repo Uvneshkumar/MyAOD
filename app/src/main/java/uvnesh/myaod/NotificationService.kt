@@ -21,6 +21,7 @@ import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.WindowManager
 import uvnesh.myaod.MainActivity.Companion.executeCommand
+import uvnesh.myaod.MainActivity.Companion.myaod_active
 import uvnesh.myaod.databinding.FloatingNotificationBinding
 import kotlin.math.abs
 
@@ -37,13 +38,9 @@ class NotificationService : NotificationListenerService() {
     private val width = getSystem().displayMetrics.widthPixels
     private var isAnimRunning = false
     private var dismissWithoutAnim = false
-    private var allowedHeadsUpPackages = listOf(
-        "com.google.android.gm",
-        "com.atlassian.android.jira.core",
-        "com.google.android.apps.photos",
-        "com.google.android.apps.docs",
-        "com.google.android.apps.docs.editors.docs",
-        "com.google.android.apps.docs.editors.sheet"
+    private var blackListedHeadsUpPackages = listOf(
+        "com.google.android.youtube",
+        "com.google.android.apps.youtube.music"
     )
 
     private val removeViewHandler = Handler(Looper.getMainLooper())
@@ -118,11 +115,7 @@ class NotificationService : NotificationListenerService() {
             (sbn?.notification?.priority ?: Notification.PRIORITY_DEFAULT) >=
                     Notification.PRIORITY_HIGH
         return when {
-            isHighPriority -> {
-                true
-            }
-
-            notificationPackageName in allowedHeadsUpPackages -> {
+            myaod_active || (isHighPriority && notificationPackageName !in blackListedHeadsUpPackages) -> {
                 true
             }
 
