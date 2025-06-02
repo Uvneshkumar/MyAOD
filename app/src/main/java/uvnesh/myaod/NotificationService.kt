@@ -21,7 +21,6 @@ import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.WindowManager
 import uvnesh.myaod.MainActivity.Companion.executeCommand
-import uvnesh.myaod.MainActivity.Companion.myaod_active
 import uvnesh.myaod.databinding.FloatingNotificationBinding
 import kotlin.math.abs
 
@@ -115,7 +114,7 @@ class NotificationService : NotificationListenerService() {
             (sbn?.notification?.priority ?: Notification.PRIORITY_DEFAULT) >=
                     Notification.PRIORITY_HIGH
         return when {
-            myaod_active || (isHighPriority && notificationPackageName !in blackListedHeadsUpPackages) -> {
+            MainActivity.myaod_active || (isHighPriority && notificationPackageName !in blackListedHeadsUpPackages) -> {
                 true
             }
 
