@@ -32,31 +32,44 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:srcCompat="@android:mipmap/sym_def_app_icon" />
 
-            <TextView
-                android:id="@+id/notificationTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:includeFontPadding="false"
-                android:textColor="@color/text_color"
-                android:textStyle="bold"
-                app:layout_constraintStart_toEndOf="@id/icon"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Title" />
-
-            <TextView
-                android:id="@+id/notificationSubText"
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/header"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:includeFontPadding="false"
-                android:textColor="@color/text_color"
-                android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="@id/notificationTitle"
+                android:layout_marginStart="16dp"
+                app:alignItems="center"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/notificationTitle"
-                app:layout_constraintTop_toTopOf="@id/notificationTitle"
-                tools:text="SubText" />
+                app:layout_constraintStart_toEndOf="@id/icon"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/notificationTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:textColor="@color/text_color"
+                    android:textStyle="bold"
+                    app:layout_flexGrow="0"
+                    app:layout_flexShrink="1"
+                    tools:text="Title" />
+
+                <TextView
+                    android:id="@+id/notificationSubText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:ellipsize="end"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:textColor="@color/text_color"
+                    android:textSize="12sp"
+                    app:layout_flexGrow="0"
+                    app:layout_flexShrink="1"
+                    tools:text="SubText" />
+
+            </com.google.android.flexbox.FlexboxLayout>
 
             <TextView
                 android:id="@+id/notificationText"
@@ -70,7 +83,7 @@
                 android:textColor="@color/text_color"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/icon"
-                app:layout_constraintTop_toBottomOf="@id/notificationTitle"
+                app:layout_constraintTop_toBottomOf="@id/header"
                 tools:text="Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text Text ." />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
