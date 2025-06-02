@@ -384,6 +384,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        @SuppressLint("InternalInsetResource", "DiscouragedApi") val resourceId: Int =
+            resources.getIdentifier("status_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            statusBarHeight = resources.getDimensionPixelSize(resourceId)
+        }
         createNotificationChannel()
         val height = getSystem().displayMetrics.heightPixels
         val width = getSystem().displayMetrics.widthPixels
@@ -736,6 +741,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         private const val LOCK_CHANNEL = "LOCK_CHANNEL"
         private const val UNLOCK_CHANNEL = "UNLOCK_CHANNEL"
 
+        var statusBarHeight = 0
         val appListItems: MutableSet<Pair<String, Drawable>> = mutableSetOf()
         var myaod_active = false
 

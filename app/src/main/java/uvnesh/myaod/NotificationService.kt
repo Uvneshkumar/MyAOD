@@ -6,6 +6,7 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.content.Context
+import android.content.res.Configuration
 import android.content.res.Resources.getSystem
 import android.graphics.PixelFormat
 import android.os.Handler
@@ -21,6 +22,7 @@ import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.WindowManager
 import uvnesh.myaod.MainActivity.Companion.executeCommand
+import uvnesh.myaod.MainActivity.Companion.statusBarHeight
 import uvnesh.myaod.databinding.FloatingNotificationBinding
 import kotlin.math.abs
 
@@ -35,6 +37,7 @@ class NotificationService : NotificationListenerService() {
     private val headsUpDismiss = 5500L
     private var currentShowingNotification: StatusBarNotification? = null
     private val width = getSystem().displayMetrics.widthPixels
+    private val height = getSystem().displayMetrics.heightPixels
     private var isAnimRunning = false
     private var dismissWithoutAnim = false
     private var blackListedHeadsUpPackages = listOf(
@@ -84,6 +87,11 @@ class NotificationService : NotificationListenerService() {
         overlayView = null
         isAnimRunning = false
         dismissalBlocked = false
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        removeNotification()
     }
 
     override fun onListenerConnected() {
@@ -289,7 +297,7 @@ class NotificationService : NotificationListenerService() {
                 overlayView = FloatingNotificationBinding.inflate(inflater)
                 val layoutFlag = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
                 val params = WindowManager.LayoutParams(
-                    width,
+                    if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) width else (height - statusBarHeight),
                     WindowManager.LayoutParams.WRAP_CONTENT,
                     layoutFlag,
                     WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
@@ -302,6 +310,9 @@ class NotificationService : NotificationListenerService() {
                         (resources.getDimension(R.dimen.notification_small_margin_bottom) + resources.getDimension(
                             R.dimen.battery_margin_bottom
                         ) + 10.px).toInt()
+                    overlayView?.card?.cardElevation = 0f
+                }
+                if (resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
                     overlayView?.card?.cardElevation = 0f
                 }
                 overlayView?.root?.alpha = 0f
