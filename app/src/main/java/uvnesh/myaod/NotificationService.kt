@@ -131,7 +131,7 @@ class NotificationService : NotificationListenerService() {
     }
 
     private fun setContent(sbn: StatusBarNotification?) {
-        val title = sbn?.notification?.extras?.getString(Notification.EXTRA_TITLE)
+        val title = sbn?.notification?.extras?.getCharSequence(Notification.EXTRA_TITLE)?.trim()
         val text =
             sbn?.notification?.extras?.getCharSequenceArray(Notification.EXTRA_TEXT_LINES).orEmpty()
                 .joinToString("\n").trim().ifEmpty {
@@ -139,7 +139,8 @@ class NotificationService : NotificationListenerService() {
                         ?: "").toString()
                         .trim()
                         .ifEmpty {
-                            sbn?.notification?.extras?.getString(Notification.EXTRA_TEXT)
+                            sbn?.notification?.extras?.getCharSequence(Notification.EXTRA_TEXT)
+                                ?.trim()
                         }
                 }
         overlayView?.notificationTitle?.text = title
