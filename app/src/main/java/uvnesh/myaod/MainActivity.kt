@@ -2,7 +2,6 @@ package uvnesh.myaod
 
 import android.animation.Animator
 import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.Notification
@@ -465,25 +464,36 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private fun startPeriodicShifting() {
         val shiftInterval = 600000L // 10 Minutes
-        shiftHandler.postDelayed(object : Runnable {
+        shiftHandler.post(object : Runnable {
             override fun run() {
                 shiftContent()
                 shiftHandler.postDelayed(this, shiftInterval)
             }
-        }, shiftInterval)
+        })
+    }
+
+    private data class ShiftValues(val x: Float, val y: Float)
+
+    private val shiftMap = mapOf(
+        0f to ShiftValues(-5f, -20f),
+        -25f to ShiftValues(5f, 20f),
+        25f to ShiftValues(-5f, 20f),
+        15f to ShiftValues(5f, -20f),
+        -15f to ShiftValues(-5f, -20f)
+    )
+
+    private fun getShiftValues(currentTotal: Float): ShiftValues {
+        return shiftMap[currentTotal] ?: ShiftValues(0f, 0f)
     }
 
     private fun shiftContent() {
-        val shiftX = (0..10).random()
-        val shiftY = (0..10).random()
-        val animator = ValueAnimator.ofFloat(0f, 1f)
-        animator.duration = 1000L
-        animator.addUpdateListener { animation ->
-            val fraction = animation.animatedFraction
-            binding.innerLayout.translationX = shiftX * fraction
-            binding.innerLayout.translationY = shiftY * fraction
-        }
-        animator.start()
+        val totalTranslation = binding.innerLayout.translationX + binding.innerLayout.translationY
+        val (shiftX, shiftY) = getShiftValues(totalTranslation)
+        binding.innerLayout.animate()
+            .translationX(shiftX)
+            .translationY(shiftY)
+            .setDuration(500L)
+            .start()
     }
 
     private fun topMargin(): Float {
