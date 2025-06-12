@@ -141,6 +141,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onPause() {
         super.onPause()
+        shiftHandler.removeCallbacks(shiftRunnable)
         if (enable_refresh_rate_switching) {
             highRefreshRate()
             refreshRateHandler.removeCallbacks(inactivityRunnable)
@@ -464,17 +465,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         binding.battery.post {
             toggleClock(sharedPrefs.getBoolean("isBig", false))
         }
-        startPeriodicShifting()
     }
 
-    private fun startPeriodicShifting() {
-        val shiftInterval = 600000L // 10 Minutes
-        shiftHandler.post(object : Runnable {
-            override fun run() {
-                shiftContent()
-                shiftHandler.postDelayed(this, shiftInterval)
-            }
-        })
+    private val shiftInterval = 600000L // 10 Minutes
+
+    private val shiftRunnable = Runnable {
+        shiftContent()
     }
 
     private data class ShiftValues(val x: Float, val y: Float)
@@ -503,6 +499,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             .translationY(shiftY)
             .setDuration(500L)
             .start()
+        shiftHandler.postDelayed(shiftRunnable, shiftInterval)
     }
 
     private fun topMargin(): Float {
@@ -569,6 +566,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 this@MainActivity, sensor, SensorManager.SENSOR_DELAY_NORMAL
             )
         }
+        shiftHandler.removeCallbacks(shiftRunnable)
+        shiftHandler.postDelayed(shiftRunnable, shiftInterval)
     }
 
     @SuppressLint("SetTextI18n")
