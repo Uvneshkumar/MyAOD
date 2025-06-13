@@ -64,11 +64,7 @@ class SwipeDetectableView @JvmOverloads constructor(
                         if (MainActivity.activeNotifications.value.orEmpty()
                                 .any { it.notification.extras.containsKey(Notification.EXTRA_MEDIA_SESSION) }
                         ) {
-                            mVibrationManager?.defaultVibrator?.vibrate(
-                                VibrationEffect.createPredefined(
-                                    VibrationEffect.EFFECT_CLICK
-                                )
-                            )
+                            vibrate()
                             if (deltaX > 0) {
                                 onSwipeRight()
                             } else {
@@ -101,7 +97,18 @@ class SwipeDetectableView @JvmOverloads constructor(
         // Handle swipe up action
     }
 
+    private fun vibrate() {
+        mVibrationManager?.defaultVibrator?.vibrate(
+            VibrationEffect.createPredefined(
+                VibrationEffect.EFFECT_CLICK
+            )
+        )
+    }
+
     private fun onSwipeDown(x: Float) {
+        if (resources.getBoolean(R.bool.should_vibrate_for_qs)) {
+            vibrate()
+        }
         val totalWidth = measuredWidth
         if (x >= 0.65 * totalWidth) {
             executeCommand("su -c cmd statusbar expand-settings")

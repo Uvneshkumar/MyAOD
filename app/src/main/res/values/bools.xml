@@ -7,4 +7,5 @@
     <bool name="should_use_unlock_volume">true</bool>
     <bool name="enable_refresh_rate_switching">false</bool>
     <bool name="enable_heads_up">false</bool>
+    <bool name="should_vibrate_for_qs">false</bool>
 </resources>
